@@ -73,7 +73,7 @@
             profile: { role: '', industry: '', aiExperience: 'beginner', painPoints: '', currentTools: '', timeWasted: '' },
             workflow: [{ description: '', timeMinutes: '', painPoints: '', tools: '', manual: true }],
             opportunities: [],
-            preferences: { method: 'nocode', budget: 'free', timeline: 'immediate', technicalSkill: 'low' }
+            preferences: { method: 'diy-simple', budget: 'free', timeline: 'soon' }
           });
 
           const [currentWorkflowType, setCurrentWorkflowType] = useState('');
@@ -508,11 +508,57 @@
                 report += `\n`;
               }
               
+              // Add implementation-specific guidance
+              if (userData.preferences.method === 'diy-simple') {
+                report += `**Recommended for DIY Simple Approach:**\n`;
+                report += `- Focus on the easiest tools first (Zapier, Google Sheets)\n`;
+                report += `- Start with free tiers to test before upgrading\n`;
+                report += `- Use pre-built templates whenever possible\n\n`;
+              } else if (userData.preferences.method === 'diy-guided') {
+                report += `**Detailed Setup Guidance:**\n`;
+                report += `- Each step includes screenshots and video links\n`;
+                report += `- Troubleshooting tips for common issues\n`;
+                report += `- Community forums and support resources\n\n`;
+              } else if (userData.preferences.method === 'hybrid') {
+                report += `**Hybrid Implementation Path:**\n`;
+                report += `- Phase 1: Simple automation with basic tools\n`;
+                report += `- Phase 2: Advanced features after you're comfortable\n`;
+                report += `- Gradual complexity increase to build confidence\n\n`;
+              } else if (userData.preferences.method === 'get-help') {
+                report += `**Getting Technical Help:**\n`;
+                report += `- Consider hiring freelancer on Upwork/Fiverr ($50-200)\n`;
+                report += `- Ask IT department or tech-savvy colleague\n`;
+                report += `- Many automation consultants offer setup services\n\n`;
+              }
+
               if (userData.preferences.budget === 'free') {
                 report += `**Free Options:**\n`;
                 report += `- Google Sheets and Gmail (free with Google account)\n`;
                 report += `- Zapier (free tier: 100 tasks/month)\n`;
                 report += `- Most tools offer free tiers to get started\n\n`;
+              }
+
+              // Add timeline-specific guidance
+              if (userData.preferences.timeline === 'asap') {
+                report += `**Quick Start (This Week):**\n`;
+                report += `- Start with the easiest automation first\n`;
+                report += `- Set aside 2-3 hours for initial setup\n`;
+                report += `- Focus on immediate wins\n\n`;
+              } else if (userData.preferences.timeline === 'soon') {
+                report += `**Planned Implementation (Next Few Weeks):**\n`;
+                report += `- Schedule setup time in your calendar\n`;
+                report += `- Prepare by signing up for tool accounts\n`;
+                report += `- Start with one automation per week\n\n`;
+              } else if (userData.preferences.timeline === 'planned') {
+                report += `**Strategic Planning (Next Month):**\n`;
+                report += `- Research tools and read documentation first\n`;
+                report += `- Plan implementation in phases\n`;
+                report += `- Consider training or skill development\n\n`;
+              } else if (userData.preferences.timeline === 'explore') {
+                report += `**Exploration Phase:**\n`;
+                report += `- Use this report for future reference\n`;
+                report += `- Bookmark recommended tools for later\n`;
+                report += `- Consider starting with free trials when ready\n\n`;
               }
               
               report += `**Getting Started (First 30 Days):**\n`;
@@ -939,26 +985,41 @@
 
                   {currentSection === 5 && (
                       <div className="animate-fade-in">
+                          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 mb-8">
+                              <div className="flex items-center gap-3 mb-4">
+                                  <div className="bg-green-500 text-white rounded-full p-2">
+                                      <Target size={24} />
+                                  </div>
+                                  <h3 className="text-xl font-bold text-gray-800">Almost there! Let's customize your implementation plan</h3>
+                              </div>
+                              <p className="text-gray-700 leading-relaxed">
+                                  Based on your workflow and selected automations, we'll now create a personalized implementation plan. 
+                                  Your answers here determine which tools we recommend, how detailed the setup instructions are, 
+                                  and what timeline works best for you.
+                              </p>
+                          </div>
+                          
                           <div className="flex items-center justify-between mb-4">
                               <h2 className="text-2xl font-bold text-gray-800">Step 5: Customize your approach</h2>
                               <button onClick={() => toggleHelp('preferences')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
                           </div>
                           {showHelp.preferences && <HelpBox>
                            <div className="text-sm text-gray-700 space-y-2">
-                               <p>Your answers here will customize the step-by-step plan in your final report to match your skills, budget, and timeline.</p>
+                               <p>Your answers here will customize the step-by-step plan in your final report to match your comfort level, budget, and timeline.</p>
                                <ul className="list-disc list-inside space-y-1">
-                                   <li><strong>Implementation Method:</strong> "No-Code" is the easiest and recommended for beginners (like building with LEGOs). "Low-Code" offers more power but may require following some technical tutorials.</li>
-                                   <li><strong>Budget:</strong> Many powerful tools have excellent free plans to start with. We'll recommend free options first if you select that.</li>
+                                   <li><strong>Implementation Approach:</strong> How hands-on do you want to be? We can recommend simple tools you set up yourself, or suggest getting help from others.</li>
+                                   <li><strong>Budget:</strong> Many powerful automation tools have excellent free plans. We'll prioritize free options if that's your preference.</li>
                                </ul>
                            </div>
                           </HelpBox>}
                           <div className="space-y-6">
                               <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-2">Preferred implementation method:</label>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">How do you prefer to implement automations?</label>
                                  <select value={userData.preferences.method} onChange={(e) => updatePreferences('method', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                                     <option value="nocode">No-Code Tools - Easiest, visual builders</option>
-                                     <option value="lowcode">Low-Code Platforms - More power, some setup</option>
-                                     <option value="ai">AI Agents - Let AI handle complexity</option>
+                                     <option value="diy-simple">Do it myself with simple tools (Zapier, Google Sheets, etc.)</option>
+                                     <option value="diy-guided">Do it myself but with detailed step-by-step guidance</option>
+                                     <option value="hybrid">Start simple, then expand with more advanced tools</option>
+                                     <option value="get-help">Get help from someone technical for setup</option>
                                  </select>
                               </div>
                               <div>
@@ -967,6 +1028,15 @@
                                      <option value="free">Free - I want to start with $0 options</option>
                                      <option value="low">Starter - Up to $50/month</option>
                                      <option value="medium">Professional - Up to $200/month</option>
+                                 </select>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">When do you want to start implementing?</label>
+                                 <select value={userData.preferences.timeline} onChange={(e) => updatePreferences('timeline', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                                     <option value="asap">This week - I want to start immediately</option>
+                                     <option value="soon">Next few weeks - when I have time to set it up</option>
+                                     <option value="planned">Next month - I need to plan and prepare first</option>
+                                     <option value="explore">Just exploring - not ready to implement yet</option>
                                  </select>
                               </div>
                           </div>
