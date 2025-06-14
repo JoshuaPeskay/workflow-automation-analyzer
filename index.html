@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Automation Analyzer</title>
+    
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Apply the Inter font and a smooth scroll behavior */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        /* Simple fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Icon Components (recreated as SVGs) ---
+        // Lucide-React icons are replaced with inline SVGs to work in this environment.
+        const ChevronRight = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>);
+        const ChevronLeft = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>);
+        const Plus = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>);
+        const Trash2 = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>);
+        const Copy = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>);
+        const Download = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>);
+        const Zap = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>);
+        const Target = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>);
+        const HelpCircle = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>);
+        const FileText = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>);
+        const Printer = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>);
+        const Info = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>);
+        const LightbulbIcon = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}><path d="M15 14c.2-1 .7-1.7 1.5-2.5C17.7 10.2 18 9 18 7c0-2.2-1.8-4-4-4S9 3.2 8 5c0 1.2.3 2.5 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>);
+        const CheckCircle = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>);
+        const XCircle = (props) => (<svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>);
+
+        // --- Main Application Component ---
+        function App() {
+          const { useState, useEffect } = React;
+
+          const [notification, setNotification] = useState({ show: false, message: '', type: 'info' });
+          const showNotification = (message, type = 'info', duration = 3000) => {
+              setNotification({ show: true, message, type });
+              setTimeout(() => {
+                  setNotification({ show: false, message: '', type: 'info' });
+              }, duration);
+          };
+
+          const [currentSection, setCurrentSection] = useState(1);
+          const [showHelp, setShowHelp] = useState({});
+          
+          const [userData, setUserData] = useState({
+            profile: { role: '', industry: '', aiExperience: 'beginner', painPoints: '', currentTools: '', timeWasted: '' },
+            workflow: [{ description: '', timeMinutes: '', painPoints: '', tools: '', manual: true }],
+            opportunities: [],
+            preferences: { method: 'nocode', budget: 'free', timeline: 'immediate', technicalSkill: 'low' }
+          });
+
+          const [currentWorkflowType, setCurrentWorkflowType] = useState('');
+          const [workflowExamples, setWorkflowExamples] = useState([]);
+
+          const totalSections = 6;
+
+          const toggleHelp = (section) => {
+            setShowHelp(prev => ({ ...prev, [section]: !prev[section] }));
+          };
+
+          const updateProfile = (field, value) => { setUserData(prev => ({...prev, profile: { ...prev.profile, [field]: value }})); };
+          const updateWorkflowStep = (index, field, value) => { const newWorkflow = [...userData.workflow]; newWorkflow[index] = { ...newWorkflow[index], [field]: value }; setUserData(prev => ({ ...prev, workflow: newWorkflow })); };
+          const addWorkflowStep = () => { setUserData(prev => ({...prev, workflow: [...prev.workflow, { description: '', timeMinutes: '', painPoints: '', tools: '', manual: true }]})); };
+          const removeWorkflowStep = (index) => { if (userData.workflow.length > 1) { setUserData(prev => ({...prev, workflow: prev.workflow.filter((_, i) => i !== index)})); } else { showNotification("You must have at least one workflow step.", 'error'); }};
+          const updatePreferences = (field, value) => { setUserData(prev => ({...prev, preferences: { ...prev.preferences, [field]: value }})); };
+
+          const workflowTemplates = {
+            'reporting': {
+              name: 'Creating Reports',
+              description: 'Tasks like weekly status reports, data summaries, or performance dashboards',
+              example: [
+                { description: 'Collect data from different sources (emails, spreadsheets, systems)', timeMinutes: 30, tools: 'Email, Excel, CRM' },
+                { description: 'Clean and organize the data', timeMinutes: 20, tools: 'Excel' },
+                { description: 'Create charts or summaries', timeMinutes: 25, tools: 'Excel, PowerPoint' },
+                { description: 'Write up findings and send report', timeMinutes: 15, tools: 'Email, Word' }
+              ]
+            },
+            'data-entry': {
+              name: 'Data Entry & Organization',
+              description: 'Moving information between systems, updating databases, or organizing files',
+              example: [
+                { description: 'Receive information (emails, forms, documents)', timeMinutes: 10, tools: 'Email' },
+                { description: 'Copy information to spreadsheet or database', timeMinutes: 40, tools: 'Excel, Database' },
+                { description: 'Check for duplicates or errors', timeMinutes: 15, tools: 'Excel' },
+                { description: 'Save and organize files', timeMinutes: 10, tools: 'File system' }
+              ]
+            },
+            'communication': {
+              name: 'Communication & Follow-ups',
+              description: 'Sending updates, following up with people, or coordinating meetings',
+              example: [
+                { description: 'Check for items needing follow-up', timeMinutes: 15, tools: 'Email, Calendar' },
+                { description: 'Write personalized follow-up messages', timeMinutes: 30, tools: 'Email' },
+                { description: 'Schedule meetings or calls', timeMinutes: 10, tools: 'Calendar' },
+                { description: 'Send reminders and confirmations', timeMinutes: 10, tools: 'Email' }
+              ]
+            },
+            'research': {
+              name: 'Research & Information Gathering',
+              description: 'Finding information online, comparing options, or creating summaries',
+              example: [
+                { description: 'Search for relevant information online', timeMinutes: 45, tools: 'Web browser' },
+                { description: 'Save and organize findings', timeMinutes: 20, tools: 'Word, Browser bookmarks' },
+                { description: 'Compare options or create summaries', timeMinutes: 30, tools: 'Excel, Word' },
+                { description: 'Share findings with team', timeMinutes: 10, tools: 'Email' }
+              ]
+            }
+          };
+
+          const validateCurrentSection = () => {
+            switch(currentSection) {
+              case 1: if (!userData.profile.role || !userData.profile.painPoints) { showNotification("Please fill in your 'Job Role' and 'Daily Frustrations' to continue.", 'error'); return false; } return true;
+              case 2: if (!currentWorkflowType) { showNotification("Please select a workflow type that matches your work.", 'error'); return false; } return true;
+              case 3: if (userData.workflow.filter(w => w.description && w.timeMinutes).length < 2) { showNotification("Please add at least two detailed workflow steps to analyze.", 'error'); return false; } return true;
+              case 4: if (userData.opportunities.filter(o => o.selected).length === 0) { showNotification("Please select at least one opportunity to include in your report.", 'error'); return false; } return true;
+              default: return true;
+            }
+          };
+
+          const selectWorkflowType = (type) => {
+            setCurrentWorkflowType(type);
+            const template = workflowTemplates[type];
+            if (template) {
+              setUserData(prev => ({ ...prev, workflow: template.example.map(step => ({ ...step, manual: true })) }));
+            }
+          };
+
+          const generateWorkflowDiagram = (workflow, isAutomated = false) => {
+            const title = isAutomated ? "IMPROVED AUTOMATED WORKFLOW" : "CURRENT MANUAL WORKFLOW";
+            let diagram = `${title}\n${'='.repeat(title.length)}\n\n`;
+            
+            workflow.forEach((step, index) => {
+              const stepNum = index + 1;
+              const time = step.timeMinutes || 0;
+              const automatedTime = isAutomated ? Math.max(1, Math.floor(time * 0.2)) : time;
+              const tools = isAutomated ? step.automatedTools || step.tools : step.tools;
+              
+              diagram += `Step ${stepNum}: ${step.description}\n`;
+              diagram += `├── Time: ${automatedTime} minutes\n`;
+              diagram += `├── Tools: ${tools}\n`;
+              if (isAutomated && step.automationNote) {
+                diagram += `├── Automation: ${step.automationNote}\n`;
+              }
+              diagram += `└── ${isAutomated ? 'Status: AUTOMATED' : 'Status: MANUAL'}\n\n`;
+            });
+            
+            const totalTime = workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0);
+            const automatedTotalTime = isAutomated ? Math.max(workflow.length, Math.floor(totalTime * 0.2)) : totalTime;
+            
+            diagram += `TOTAL TIME: ${automatedTotalTime} minutes\n`;
+            if (isAutomated) {
+              diagram += `TIME SAVED: ${totalTime - automatedTotalTime} minutes (${Math.round(((totalTime - automatedTotalTime) / totalTime) * 100)}% reduction)\n`;
+            }
+            
+            return diagram;
+          };
+
+          const changeSection = (direction) => {
+            if (direction === 1 && !validateCurrentSection()) return;
+            const newSection = currentSection + direction;
+            if (newSection >= 1 && newSection <= totalSections) {
+              setCurrentSection(newSection);
+              if (newSection === 4) generateOpportunities();
+              document.querySelector('.app-container').scrollTo(0, 0);
+            }
+          };
+
+          const generateOpportunities = () => {
+            const totalTime = userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0);
+            const weeklyTime = Math.round(totalTime / 60 * 5); // Assuming done 5x per week
+            
+            // Generate opportunities based on workflow type and user data
+            const opportunities = [];
+            
+            if (currentWorkflowType === 'reporting') {
+              opportunities.push({
+                id: 1,
+                title: "Automated Data Collection & Report Generation",
+                description: "Set up automatic data gathering from your sources and generate reports with one click",
+                impact: "High",
+                effort: "Medium",
+                tools: ["Google Sheets + Apps Script", "Zapier + Google Drive", "Microsoft Power Automate"],
+                timeSaved: `${Math.round(weeklyTime * 0.7)} hours/week`,
+                selected: false,
+                steps: [
+                  "Connect your data sources (email, CRM, etc.) to Google Sheets using Zapier",
+                  "Create a template report in Google Docs or Sheets",
+                  "Set up automatic data refresh and chart generation",
+                  "Schedule automatic report delivery via email"
+                ],
+                automatedWorkflow: userData.workflow.map(step => ({
+                  ...step,
+                  automatedTools: step.description.includes('Collect data') ? 'Zapier + Google Sheets (auto-sync)' :
+                                 step.description.includes('Clean') ? 'Google Sheets (auto-formulas)' :
+                                 step.description.includes('Create charts') ? 'Google Sheets (auto-charts)' :
+                                 'Gmail (scheduled send)',
+                  automationNote: step.description.includes('Collect data') ? 'Data flows automatically from sources' :
+                                 step.description.includes('Clean') ? 'Formulas clean data automatically' :
+                                 step.description.includes('Create charts') ? 'Charts update automatically' :
+                                 'Report emails sent on schedule'
+                }))
+              });
+            }
+            
+            if (currentWorkflowType === 'data-entry') {
+              opportunities.push({
+                id: 2,
+                title: "Smart Data Entry with AI Form Processing",
+                description: "Automatically extract and organize information from emails, documents, and forms",
+                impact: "High",
+                effort: "Low",
+                tools: ["Zapier + Gmail", "Parseur", "Airtable"],
+                timeSaved: `${Math.round(weeklyTime * 0.8)} hours/week`,
+                selected: false,
+                steps: [
+                  "Set up email parsing with Parseur to extract data automatically",
+                  "Connect Parseur to Airtable or Google Sheets via Zapier",
+                  "Create templates for different types of information",
+                  "Set up duplicate detection and error checking"
+                ],
+                automatedWorkflow: userData.workflow.map(step => ({
+                  ...step,
+                  automatedTools: step.description.includes('Receive') ? 'Gmail + Parseur (auto-extract)' :
+                                 step.description.includes('Copy') ? 'Zapier + Airtable (auto-populate)' :
+                                 step.description.includes('Check') ? 'Airtable (auto-dedupe)' :
+                                 'Google Drive (auto-organize)',
+                  automationNote: step.description.includes('Receive') ? 'Data extracted automatically from emails' :
+                                 step.description.includes('Copy') ? 'Information flows directly to database' :
+                                 step.description.includes('Check') ? 'Automatic duplicate detection' :
+                                 'Files organized automatically'
+                }))
+              });
+            }
+            
+            if (currentWorkflowType === 'communication') {
+              opportunities.push({
+                id: 3,
+                title: "Automated Follow-up and Meeting Coordination",
+                description: "Set up smart follow-up sequences and automated meeting scheduling",
+                impact: "High",
+                effort: "Low",
+                tools: ["Calendly", "Zapier + Gmail", "Boomerang"],
+                timeSaved: `${Math.round(weeklyTime * 0.6)} hours/week`,
+                selected: false,
+                steps: [
+                  "Set up Calendly for automatic meeting scheduling",
+                  "Create email templates for common follow-ups",
+                  "Use Boomerang to schedule follow-up reminders",
+                  "Set up Zapier to trigger follow-ups based on events"
+                ],
+                automatedWorkflow: userData.workflow.map(step => ({
+                  ...step,
+                  automatedTools: step.description.includes('Check') ? 'Zapier + CRM (auto-trigger)' :
+                                 step.description.includes('Write') ? 'Gmail templates + Boomerang' :
+                                 step.description.includes('Schedule') ? 'Calendly (self-booking)' :
+                                 'Gmail + Calendar (auto-reminders)',
+                  automationNote: step.description.includes('Check') ? 'System identifies follow-up needs automatically' :
+                                 step.description.includes('Write') ? 'Templates and scheduled sending' :
+                                 step.description.includes('Schedule') ? 'People book their own meetings' :
+                                 'Reminders sent automatically'
+                }))
+              });
+            }
+            
+            if (currentWorkflowType === 'research') {
+              opportunities.push({
+                id: 4,
+                title: "AI-Powered Research and Information Organization",
+                description: "Use AI tools to gather, summarize, and organize research automatically",
+                impact: "Medium",
+                effort: "Medium",
+                tools: ["Notion AI", "Zapier + Google Sheets", "Perplexity AI"],
+                timeSaved: `${Math.round(weeklyTime * 0.5)} hours/week`,
+                selected: false,
+                steps: [
+                  "Set up research templates in Notion with AI summaries",
+                  "Use AI tools like Perplexity for initial research",
+                  "Create automated organization system in Notion",
+                  "Set up sharing workflows for team collaboration"
+                ],
+                automatedWorkflow: userData.workflow.map(step => ({
+                  ...step,
+                  automatedTools: step.description.includes('Search') ? 'Perplexity AI + Notion' :
+                                 step.description.includes('Save') ? 'Notion (auto-organize)' :
+                                 step.description.includes('Compare') ? 'Notion AI (auto-summary)' :
+                                 'Notion + Slack (auto-share)',
+                  automationNote: step.description.includes('Search') ? 'AI provides researched summaries' :
+                                 step.description.includes('Save') ? 'Information organized automatically' :
+                                 step.description.includes('Compare') ? 'AI creates comparison summaries' :
+                                 'Findings shared automatically'
+                }))
+              });
+            }
+            
+            // Add a universal efficiency opportunity
+            opportunities.push({
+              id: 5,
+              title: "Workflow Monitoring and Continuous Improvement",
+              description: "Set up tracking to identify bottlenecks and further optimization opportunities",
+              impact: "Medium",
+              effort: "Low",
+              tools: ["Google Forms", "Zapier", "Google Sheets"],
+              timeSaved: "Additional 2-3 hours/week over time",
+              selected: false,
+              steps: [
+                "Create simple tracking form for workflow completion times",
+                "Set up automatic data collection in Google Sheets",
+                "Create dashboard to identify patterns and bottlenecks",
+                "Schedule monthly reviews for further optimization"
+              ]
+            });
+            
+            setUserData(prev => ({ ...prev, opportunities }));
+          };
+
+          const toggleOpportunity = (id) => { setUserData(prev => ({...prev, opportunities: prev.opportunities.map(opp => opp.id === id ? { ...opp, selected: !opp.selected } : opp)})); };
+          
+          const copyToClipboard = (text) => {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed'; textArea.style.top = 0; textArea.style.left = 0;
+            document.body.appendChild(textArea);
+            textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); showNotification('Report copied to clipboard!', 'success'); } catch (err) { showNotification('Failed to copy report.', 'error'); }
+            document.body.removeChild(textArea);
+          };
+
+          const generateFullReport = () => {
+            const selectedOpportunities = userData.opportunities.filter(opp => opp.selected);
+            const totalCurrentTime = userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0);
+            
+            let report = `# WORKFLOW AUTOMATION REPORT\n`;
+            report += `Generated: ${new Date().toLocaleDateString()}\n`;
+            report += `Report for: ${userData.profile.role}\n\n`;
+            
+            report += `## EXECUTIVE SUMMARY\n`;
+            report += `You currently spend ${totalCurrentTime} minutes on this workflow.\n`;
+            report += `With automation, you could reduce this to ${Math.max(selectedOpportunities.length, Math.floor(totalCurrentTime * 0.2))} minutes.\n`;
+            report += `Time savings: ${totalCurrentTime - Math.max(selectedOpportunities.length, Math.floor(totalCurrentTime * 0.2))} minutes per instance\n\n`;
+            
+            report += `## CURRENT WORKFLOW ANALYSIS\n`;
+            report += generateWorkflowDiagram(userData.workflow, false);
+            report += `\n`;
+            
+            if (selectedOpportunities.length > 0 && selectedOpportunities[0].automatedWorkflow) {
+              report += `## IMPROVED AUTOMATED WORKFLOW\n`;
+              report += generateWorkflowDiagram(selectedOpportunities[0].automatedWorkflow, true);
+              report += `\n`;
+            }
+            
+            report += `## RECOMMENDED AUTOMATION SOLUTIONS\n\n`;
+            selectedOpportunities.forEach((opp, index) => {
+              report += `### ${index + 1}. ${opp.title}\n`;
+              report += `**Impact:** ${opp.impact} | **Effort:** ${opp.effort} | **Time Saved:** ${opp.timeSaved}\n\n`;
+              report += `**Description:** ${opp.description}\n\n`;
+              report += `**Recommended Tools:**\n`;
+              opp.tools.forEach(tool => report += `- ${tool}\n`);
+              report += `\n`;
+              
+              if (opp.steps) {
+                report += `**Implementation Steps:**\n`;
+                opp.steps.forEach((step, stepIndex) => {
+                  report += `${stepIndex + 1}. ${step}\n`;
+                });
+                report += `\n`;
+              }
+              
+              if (userData.preferences.budget === 'free') {
+                report += `**Free Options:**\n`;
+                report += `- Google Sheets and Gmail (free with Google account)\n`;
+                report += `- Zapier (free tier: 100 tasks/month)\n`;
+                report += `- Most tools offer free tiers to get started\n\n`;
+              }
+              
+              report += `**Getting Started (First 30 Days):**\n`;
+              if (opp.title.includes('Report')) {
+                report += `Week 1: Set up Google Sheets template and connect one data source\n`;
+                report += `Week 2: Add automatic chart generation and formatting\n`;
+                report += `Week 3: Set up email delivery automation\n`;
+                report += `Week 4: Test full workflow and refine\n\n`;
+              } else if (opp.title.includes('Data Entry')) {
+                report += `Week 1: Sign up for Parseur and connect to Gmail\n`;
+                report += `Week 2: Create parsing templates for your most common emails\n`;
+                report += `Week 3: Connect to Airtable and set up data structure\n`;
+                report += `Week 4: Test full automation and add error handling\n\n`;
+              } else if (opp.title.includes('Follow-up')) {
+                report += `Week 1: Set up Calendly account and basic booking page\n`;
+                report += `Week 2: Create email templates for common follow-ups\n`;
+                report += `Week 3: Set up Boomerang for email scheduling\n`;
+                report += `Week 4: Connect systems and test full workflow\n\n`;
+              } else if (opp.title.includes('Research')) {
+                report += `Week 1: Set up Notion workspace with research templates\n`;
+                report += `Week 2: Learn to use Perplexity AI for research queries\n`;
+                report += `Week 3: Create automated organization system\n`;
+                report += `Week 4: Set up team sharing and collaboration\n\n`;
+              } else {
+                report += `Week 1: Choose your primary tool and create account\n`;
+                report += `Week 2: Set up basic automation for one step\n`;
+                report += `Week 3: Expand automation to full workflow\n`;
+                report += `Week 4: Test, refine, and document your new process\n\n`;
+              }
+              
+              report += `**Success Metrics:**\n`;
+              report += `- Time per workflow instance (target: under ${Math.floor(totalCurrentTime * 0.3)} minutes)\n`;
+              report += `- Error rate (target: under 5%)\n`;
+              report += `- User satisfaction (target: 8/10 or higher)\n`;
+              report += `- Weekly time saved (target: ${opp.timeSaved})\n\n`;
+              
+              report += `---\n\n`;
+            });
+            
+            report += `## IMPLEMENTATION ROADMAP\n\n`;
+            report += `**Phase 1 (Month 1): Foundation**\n`;
+            report += `- Set up accounts for recommended tools\n`;
+            report += `- Implement one automation (start with highest impact, lowest effort)\n`;
+            report += `- Document your new process\n`;
+            report += `- Measure time savings\n\n`;
+            
+            report += `**Phase 2 (Month 2): Expansion**\n`;
+            report += `- Add remaining automations\n`;
+            report += `- Integrate systems for seamless workflow\n`;
+            report += `- Train team members if applicable\n`;
+            report += `- Set up monitoring and alerts\n\n`;
+            
+            report += `**Phase 3 (Month 3+): Optimization**\n`;
+            report += `- Analyze performance data\n`;
+            report += `- Identify additional automation opportunities\n`;
+            report += `- Scale successful automations to other workflows\n`;
+            report += `- Continuous improvement based on feedback\n\n`;
+            
+            report += `## SUPPORT RESOURCES\n\n`;
+            report += `**Learning Resources:**\n`;
+            report += `- Zapier University (free courses): zapier.com/university\n`;
+            report += `- Google Workspace Learning Center: workspace.google.com/learning\n`;
+            report += `- YouTube tutorials for specific tools\n`;
+            report += `- Tool-specific help documentation\n\n`;
+            
+            report += `**Getting Help:**\n`;
+            report += `- Most tools offer free chat support\n`;
+            report += `- Online communities (Reddit, Discord) for specific tools\n`;
+            report += `- Consider hiring a freelancer for complex setups (Upwork, Fiverr)\n\n`;
+            
+            report += `**Next Steps:**\n`;
+            report += `1. Choose ONE automation to start with (recommend highest impact, lowest effort)\n`;
+            report += `2. Sign up for the free version of required tools\n`;
+            report += `3. Follow the week-by-week implementation plan\n`;
+            report += `4. Track your time savings and celebrate wins!\n`;
+            report += `5. Come back to this report to implement additional automations\n\n`;
+            
+            report += `---\n`;
+            report += `*This report was generated by Workflow Automation Analyzer*\n`;
+            report += `*For updates or questions, refer to the tool documentation*`;
+            
+            return report;
+          };
+          const copyReport = () => { copyToClipboard(generateFullReport()); };
+          const downloadReport = () => { 
+            const report = generateFullReport();
+            const blob = new Blob([report], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `workflow-automation-report-${new Date().toISOString().split('T')[0]}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showNotification('Report downloaded successfully!', 'success');
+          };
+          
+          const printReport = () => { 
+            const report = generateFullReport();
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+              <html>
+                <head>
+                  <title>Workflow Automation Report</title>
+                  <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+                    h1, h2, h3 { color: #333; margin-top: 24px; margin-bottom: 16px; }
+                    h1 { border-bottom: 2px solid #333; padding-bottom: 8px; }
+                    h2 { border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+                    pre { background: #f5f5f5; padding: 16px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+                    ul, ol { margin: 16px 0; }
+                    li { margin: 4px 0; }
+                    hr { border: none; border-top: 1px solid #ccc; margin: 24px 0; }
+                    .no-break { page-break-inside: avoid; }
+                    @media print { body { margin: 0; } }
+                  </style>
+                </head>
+                <body>
+                  <pre>${report}</pre>
+                </body>
+              </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+            showNotification("Print dialog opened!", 'success');
+          };
+
+          const progressPercentage = (currentSection / totalSections) * 100;
+
+          const Notification = ({ message, type }) => {
+            const baseClasses = "fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 transition-transform transform";
+            const typeClasses = { info: "bg-blue-500 text-white", success: "bg-green-500 text-white", error: "bg-red-500 text-white" };
+            return (<div className={`${baseClasses} ${typeClasses[type]}`}> {type === 'success' && <CheckCircle size={20} />} {type === 'error' && <XCircle size={20} />} {type === 'info' && <Info size={20} />} <span>{message}</span> </div>);
+          };
+          
+          const HelpBox = ({ children }) => (
+            <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg mb-6 mt-2 animate-fade-in">
+                <p className="font-bold text-purple-800 mb-2">How to complete this section:</p>
+                {children}
+            </div>
+          );
+
+          return (
+            <div className="min-h-screen bg-gray-100 p-0 sm:p-4 app-container">
+              {notification.show && <Notification message={notification.message} type={notification.type} />}
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-none sm:rounded-3xl shadow-2xl p-4 sm:p-8">
+                  <h1 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-2">🤖 Workflow Automation Analyzer</h1>
+                  <p className="text-center text-gray-600 mb-8 px-4">Discover hidden automation opportunities in your daily work.</p>
+
+                  <div className="mb-8 px-2">
+                    <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}/>
+                    </div>
+                    <div className="flex justify-between mt-2 text-xs text-gray-500">
+                      <span>Profile</span><span>Type</span><span>Steps</span><span>Options</span><span>Prefs</span><span>Report</span>
+                    </div>
+                  </div>
+
+                  {currentSection === 1 && (
+                     <div className="animate-fade-in">
+                       <div className="flex items-center justify-between mb-4">
+                           <h2 className="text-2xl font-bold text-gray-800">Step 1: Tell us about yourself</h2>
+                           <button onClick={() => toggleHelp('profile')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
+                       </div>
+                       {showHelp.profile && <HelpBox>
+                           <div className="text-sm text-gray-700 space-y-2">
+                               <p>The goal of this section is to understand your work context. The more specific you are, the more personalized and accurate your automation report will be.</p>
+                               <ul className="list-disc list-inside space-y-1">
+                                   <li><strong>Job Role:</strong> This helps us tailor suggestions. "Content Marketing Manager" is better than "Manager".</li>
+                                   <li><strong>Daily Frustrations:</strong> This is the most important field! Think of specific, repetitive tasks.
+                                    <br/><strong>Good examples:</strong> <em>"Manually copy-pasting sales leads from emails into a spreadsheet,"</em> or <em>"Spending an hour every morning compiling a status report."</em>
+                                   </li>
+                               </ul>
+                           </div>
+                       </HelpBox>}
+                       <div className="space-y-6">
+                           <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-2">What's your job role? *</label>
+                             <input type="text" value={userData.profile.role} onChange={(e) => updateProfile('role', e.target.value)} placeholder="e.g., Marketing Manager, Data Analyst" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
+                           </div>
+                            <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-2">What are your biggest daily frustrations or repetitive tasks? *</label>
+                             <textarea value={userData.profile.painPoints} onChange={(e) => updateProfile('painPoints', e.target.value)} placeholder="e.g., Repetitive data entry, Copy-pasting info between apps" rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none resize-none"/>
+                           </div>
+                       </div>
+                     </div>
+                  )}
+
+                  {currentSection === 2 && (
+                    <div className="animate-fade-in">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">Step 2: What type of work do you want to automate?</h2>
+                            <button onClick={() => toggleHelp('workflowType')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
+                        </div>
+                        {showHelp.workflowType && <HelpBox>
+                            <div className="text-sm text-gray-700 space-y-2">
+                                <p>Choose the category that best matches the repetitive work you want to automate. Don't worry about getting it perfect - we'll customize everything in the next step.</p>
+                                <p><strong>Tip:</strong> Think about the work that takes you the most time or that you find most tedious. That's usually the best place to start with automation!</p>
+                            </div>
+                        </HelpBox>}
+                        <p className="text-gray-600 mb-6">Select the type of workflow that best matches your repetitive task:</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Object.entries(workflowTemplates).map(([key, template]) => (
+                                <div key={key} onClick={() => selectWorkflowType(key)} className={`cursor-pointer p-6 rounded-xl border-2 transition-all transform hover:scale-[1.02] ${currentWorkflowType === key ? 'border-purple-600 bg-purple-50 shadow-lg' : 'border-gray-300 bg-white hover:border-purple-400'}`}>
+                                    <div className="flex items-start gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-1 ${currentWorkflowType === key ? 'bg-purple-600 border-purple-600' : 'border-gray-400'}`}>
+                                            {currentWorkflowType === key && <div className="w-3 h-3 bg-white rounded-full m-0.5"></div>}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-800 mb-2">{template.name}</h3>
+                                            <p className="text-gray-600 text-sm">{template.description}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {currentWorkflowType && (
+                            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-sm text-blue-800 mb-2"><strong>Great choice!</strong> Here's an example of what this type of workflow looks like:</p>
+                                <div className="text-sm text-gray-700">
+                                    {workflowTemplates[currentWorkflowType].example.map((step, index) => (
+                                        <div key={index} className="mb-1">• {step.description} ({step.timeMinutes} min)</div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                  )}
+
+                  {currentSection === 3 && (
+                    <div className="animate-fade-in">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">Step 3: Customize your workflow steps</h2>
+                             <button onClick={() => toggleHelp('workflow')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
+                        </div>
+                        {showHelp.workflow && <HelpBox>
+                            <div className="text-sm text-gray-700 space-y-3">
+                                <p>We've pre-filled your workflow based on the type you selected. Feel free to modify the steps to match exactly what you do.</p>
+                                <p><strong>Tips for customizing:</strong></p>
+                                <ul className="list-disc list-inside space-y-1">
+                                    <li>Change the time estimates to match your actual experience</li>
+                                    <li>Update tool names to match what you actually use</li>
+                                    <li>Add or remove steps as needed</li>
+                                    <li>Be specific about what you do in each step</li>
+                                </ul>
+                                <p><strong>Example:</strong> Instead of "Check emails", write "Open Gmail and copy customer order details into Excel spreadsheet"</p>
+                            </div>
+                        </HelpBox>}
+                        <p className="text-gray-600 mb-6">Review and customize these workflow steps to match exactly what you do:</p>
+                        <div className="space-y-4">
+                            {userData.workflow.map((step, index) => (
+                                <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="font-medium text-gray-700 flex items-center gap-2"><span className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">{index + 1}</span> Step {index + 1}</span>
+                                        {userData.workflow.length > 1 && (<button onClick={() => removeWorkflowStep(index)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>)}
+                                    </div>
+                                    <input type="text" value={step.description} onChange={(e) => updateWorkflowStep(index, 'description', e.target.value)} placeholder="Step description (e.g., Copy data from Email)" className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input type="number" value={step.timeMinutes} onChange={(e) => updateWorkflowStep(index, 'timeMinutes', e.target.value)} placeholder="Time (minutes)" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
+                                        <input type="text" value={step.tools} onChange={(e) => updateWorkflowStep(index, 'tools', e.target.value)} placeholder="Tools used (e.g., Gmail)" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <button onClick={addWorkflowStep} className="mt-4 flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"><Plus size={18} /> Add Step</button>
+                    </div>
+                  )}
+
+                  {currentSection === 4 && (
+                     <div className="animate-fade-in">
+                        <div className="flex items-center justify-between mb-4">
+                           <h2 className="text-2xl font-bold text-gray-800">Step 4: Your automation opportunities!</h2>
+                           <button onClick={() => toggleHelp('opportunities')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
+                        </div>
+                        {showHelp.opportunities && <HelpBox>
+                           <div className="text-sm text-gray-700 space-y-2">
+                               <p>Based on your input, our AI has identified these high-impact ways to automate your work. Here's what the labels mean:</p>
+                               <ul className="list-disc list-inside space-y-1">
+                                   <li><strong>Time Saved:</strong> An estimate of how much time you'll get back each week.</li>
+                                   <li><strong>Impact:</strong> How much this will improve your overall workflow and reduce errors.</li>
+                                   <li><strong>Effort:</strong> How difficult this is to set up (Low effort is easiest!).</li>
+                               </ul>
+                               <p><strong>Recommendation:</strong> For a quick win, choose one opportunity with <strong>High Impact</strong> and <strong>Low Effort</strong>. You are just selecting which solutions to include in your final detailed report.</p>
+                           </div>
+                        </HelpBox>}
+                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6"><p className="text-sm text-blue-800">Select at least one opportunity to include in your personalized report.</p></div>
+                        <div className="space-y-4">
+                            {userData.opportunities.map((opp) => (
+                                <div key={opp.id} onClick={() => toggleOpportunity(opp.id)} className={`cursor-pointer p-6 rounded-xl border-2 transition-all transform hover:scale-[1.02] ${opp.selected ? 'border-purple-600 bg-purple-50 shadow-lg' : 'border-gray-300 bg-white hover:border-purple-400'}`}>
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h3 className="font-bold text-lg flex items-center gap-2">{opp.selected ? <CheckCircle className="text-purple-600" size={20} /> : <div className="w-5 h-5 border-2 border-gray-400 rounded-full flex-shrink-0"></div>}<span className="flex-grow">{opp.title}</span></h3>
+                                        <div className="flex items-center gap-2 text-sm font-medium text-yellow-600 flex-shrink-0"><Zap size={16} /> {opp.timeSaved}</div>
+                                    </div>
+                                    <p className="text-gray-600 mb-3">{opp.description}</p>
+                                    <div className="flex gap-4 text-sm">
+                                        <span className={`px-2 py-1 rounded ${opp.impact === 'High' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                            {opp.impact} Impact
+                                        </span>
+                                        <span className={`px-2 py-1 rounded ${opp.effort === 'Low' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                            {opp.effort} Effort
+                                        </span>
+                                    </div>
+                                    {opp.tools && (
+                                        <div className="mt-3 text-sm text-gray-600">
+                                            <strong>Tools:</strong> {opp.tools.join(', ')}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                     </div>
+                  )}
+
+                  {currentSection === 5 && (
+                      <div className="animate-fade-in">
+                          <div className="flex items-center justify-between mb-4">
+                              <h2 className="text-2xl font-bold text-gray-800">Step 5: Customize your approach</h2>
+                              <button onClick={() => toggleHelp('preferences')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
+                          </div>
+                          {showHelp.preferences && <HelpBox>
+                           <div className="text-sm text-gray-700 space-y-2">
+                               <p>Your answers here will customize the step-by-step plan in your final report to match your skills, budget, and timeline.</p>
+                               <ul className="list-disc list-inside space-y-1">
+                                   <li><strong>Implementation Method:</strong> "No-Code" is the easiest and recommended for beginners (like building with LEGOs). "Low-Code" offers more power but may require following some technical tutorials.</li>
+                                   <li><strong>Budget:</strong> Many powerful tools have excellent free plans to start with. We'll recommend free options first if you select that.</li>
+                               </ul>
+                           </div>
+                          </HelpBox>}
+                          <div className="space-y-6">
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">Preferred implementation method:</label>
+                                 <select value={userData.preferences.method} onChange={(e) => updatePreferences('method', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                                     <option value="nocode">No-Code Tools - Easiest, visual builders</option>
+                                     <option value="lowcode">Low-Code Platforms - More power, some setup</option>
+                                     <option value="ai">AI Agents - Let AI handle complexity</option>
+                                 </select>
+                              </div>
+                              <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-2">Budget for tools:</label>
+                                 <select value={userData.preferences.budget} onChange={(e) => updatePreferences('budget', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                                     <option value="free">Free - I want to start with $0 options</option>
+                                     <option value="low">Starter - Up to $50/month</option>
+                                     <option value="medium">Professional - Up to $200/month</option>
+                                 </select>
+                              </div>
+                          </div>
+                      </div>
+                  )}
+                  
+                  {currentSection === 6 && (
+                      <div className="animate-fade-in">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"><Zap className="text-yellow-500" />Your automation roadmap is ready!</h2>
+                          <div className="bg-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto mb-6 border border-gray-300">
+                              <pre className="whitespace-pre-wrap">{generateFullReport()}</pre>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <button onClick={copyReport} className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"><Copy size={18} /> Copy Report</button>
+                              <button onClick={downloadReport} className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Download size={18} /> Download (.md)</button>
+                              <button onClick={printReport} className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"><Printer size={18} /> Print Report</button>
+                              <button onClick={() => showNotification('PDF export is a planned feature!', 'info')} className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"><FileText size={18} /> Export as PDF</button>
+                          </div>
+                      </div>
+                  )}
+
+                  {/* Navigation */}
+                  <div className="flex justify-between items-center mt-8">
+                    <div className="w-1/3">
+                        {currentSection > 1 && (<button onClick={() => changeSection(-1)} className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"><ChevronLeft size={20} /> Previous</button>)}
+                    </div>
+                    <div className="w-1/3 text-center text-gray-500 self-center">Step {currentSection} of {totalSections}</div>
+                    <div className="w-1/3 flex justify-end">
+                        {currentSection < totalSections && (<button onClick={() => changeSection(1)} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all ml-auto transform hover:scale-105 shadow-md hover:shadow-lg">{currentSection === totalSections - 1 ? 'Generate Report' : 'Next Step'} <ChevronRight size={20} /></button>)}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-center mt-6 text-gray-500 text-sm p-4">
+                  <p>🔒 Your data is processed locally in your browser and is never stored on a server.</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
