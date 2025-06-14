@@ -79,7 +79,7 @@
           const [currentWorkflowType, setCurrentWorkflowType] = useState('');
           const [workflowExamples, setWorkflowExamples] = useState([]);
 
-          const totalSections = 6;
+          const totalSections = 7;
 
           const toggleHelp = (section) => {
             setShowHelp(prev => ({ ...prev, [section]: !prev[section] }));
@@ -160,6 +160,8 @@
               case 2: if (!currentWorkflowType) { showNotification("Please select a workflow type that matches your work.", 'error'); return false; } return true;
               case 3: if (userData.workflow.filter(w => w.description && w.timeMinutes).length < 2) { showNotification("Please add at least two detailed workflow steps to analyze.", 'error'); return false; } return true;
               case 4: if (userData.opportunities.filter(o => o.selected).length === 0) { showNotification("Please select at least one opportunity to include in your report.", 'error'); return false; } return true;
+              case 5: return true; // Preferences step - no validation needed
+              case 6: return true; // Diagram step - no validation needed
               default: return true;
             }
           };
@@ -202,12 +204,63 @@
             return diagram;
           };
 
+          const generateMermaidDiagram = (workflow, isAutomated = false) => {
+            const title = isAutomated ? "Automated Workflow" : "Current Workflow";
+            let mermaid = `flowchart TD\n`;
+            mermaid += `    Start([Start: ${title}]) --> A1\n`;
+            
+            workflow.forEach((step, index) => {
+              const stepId = `A${index + 1}`;
+              const nextStepId = index < workflow.length - 1 ? `A${index + 2}` : 'End';
+              const time = step.timeMinutes || 0;
+              const automatedTime = isAutomated ? Math.max(1, Math.floor(time * 0.2)) : time;
+              const timeRange = automatedTime <= 15 ? 'Under 15 min' : 
+                              automatedTime <= 30 ? '15-30 min' :
+                              automatedTime <= 60 ? '30-60 min' :
+                              automatedTime <= 120 ? '1-2 hours' : '2+ hours';
+              
+              const stepText = step.description.length > 30 ? 
+                step.description.substring(0, 30) + '...' : 
+                step.description;
+              
+              mermaid += `    ${stepId}["${stepText}<br/>(${timeRange})"] --> ${nextStepId}\n`;
+              
+              if (isAutomated && step.automationNote) {
+                mermaid += `    ${stepId} -.-> Note${index + 1}[${step.automationNote}]\n`;
+              }
+            });
+            
+            const totalTime = workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0);
+            const automatedTotalTime = isAutomated ? Math.max(workflow.length, Math.floor(totalTime * 0.2)) : totalTime;
+            const totalTimeDisplay = automatedTotalTime <= 15 ? 'Under 15 min' : 
+                                    automatedTotalTime <= 30 ? '15-30 min' :
+                                    automatedTotalTime <= 60 ? '30-60 min' :
+                                    automatedTotalTime <= 120 ? '1-2 hours' : '2+ hours';
+            
+            mermaid += `    End([Complete<br/>Total: ${totalTimeDisplay}])\n`;
+            
+            // Add styling
+            if (isAutomated) {
+              mermaid += `    classDef automated fill:#d1fae5,stroke:#10b981,stroke-width:2px\n`;
+              workflow.forEach((_, index) => {
+                mermaid += `    class A${index + 1} automated\n`;
+              });
+            } else {
+              mermaid += `    classDef manual fill:#fef3c7,stroke:#f59e0b,stroke-width:2px\n`;
+              workflow.forEach((_, index) => {
+                mermaid += `    class A${index + 1} manual\n`;
+              });
+            }
+            
+            return mermaid;
+          };
+
           const changeSection = (direction) => {
             if (direction === 1 && !validateCurrentSection()) return;
             const newSection = currentSection + direction;
             if (newSection >= 1 && newSection <= totalSections) {
               setCurrentSection(newSection);
-              if (newSection === 4) generateOpportunities();
+              if (newSection === 5) generateOpportunities();
               document.querySelector('.app-container').scrollTo(0, 0);
             }
           };
@@ -715,7 +768,7 @@
                       <div className="bg-gradient-to-r from-purple-500 to-blue-500 h-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}/>
                     </div>
                     <div className="flex justify-between mt-2 text-xs text-gray-500">
-                      <span>Profile</span><span>Type</span><span>Steps</span><span>Options</span><span>Prefs</span><span>Report</span>
+                      <span>Profile</span><span>Type</span><span>Steps</span><span>Options</span><span>Prefs</span><span>Diagrams</span><span>Report</span>
                     </div>
                   </div>
 
@@ -985,6 +1038,65 @@
 
                   {currentSection === 5 && (
                       <div className="animate-fade-in">
+                          <div className="flex items-center justify-between mb-4">
+                              <h2 className="text-2xl font-bold text-gray-800">Step 5: Workflow Visualization</h2>
+                              <button onClick={() => toggleHelp('diagrams')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
+                          </div>
+                          {showHelp.diagrams && <HelpBox>
+                              <div className="text-sm text-gray-700 space-y-2">
+                                  <p>These visual diagrams show your workflow transformation at a glance. The diagrams help you understand exactly how automation will change your process.</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                      <li><strong>Current State:</strong> Shows your manual workflow with current time investments</li>
+                                      <li><strong>Future State:</strong> Shows the automated workflow with reduced time and effort</li>
+                                      <li><strong>Mermaid Format:</strong> Professional diagrams you can copy and use in documentation</li>
+                                  </ul>
+                              </div>
+                          </HelpBox>}
+                          
+                          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6">
+                              <p className="text-sm text-blue-800">
+                                  Review these visual diagrams of your workflow transformation. You can copy the diagram code to use in your own documentation.
+                              </p>
+                          </div>
+
+                          <div className="space-y-8">
+                              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                      <div className="bg-yellow-500 text-white rounded-full p-1">
+                                          <Target size={20} />
+                                      </div>
+                                      Current Manual Workflow
+                                  </h3>
+                                  <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                                      <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap">{generateMermaidDiagram(userData.workflow, false)}</pre>
+                                  </div>
+                                  <button onClick={() => copyToClipboard(generateMermaidDiagram(userData.workflow, false))} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded">
+                                      Copy Mermaid Code
+                                  </button>
+                              </div>
+
+                              {userData.opportunities.filter(opp => opp.selected).length > 0 && userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow && (
+                                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                                      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                          <div className="bg-green-500 text-white rounded-full p-1">
+                                              <Zap size={20} />
+                                          </div>
+                                          Proposed Automated Workflow
+                                      </h3>
+                                      <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                                          <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap">{generateMermaidDiagram(userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow, true)}</pre>
+                                      </div>
+                                      <button onClick={() => copyToClipboard(generateMermaidDiagram(userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow, true))} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded">
+                                          Copy Mermaid Code
+                                      </button>
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  )}
+
+                  {currentSection === 6 && (
+                      <div className="animate-fade-in">
                           <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-6 mb-8">
                               <div className="flex items-center gap-3 mb-4">
                                   <div className="bg-green-500 text-white rounded-full p-2">
@@ -1000,7 +1112,7 @@
                           </div>
                           
                           <div className="flex items-center justify-between mb-4">
-                              <h2 className="text-2xl font-bold text-gray-800">Step 5: Customize your approach</h2>
+                              <h2 className="text-2xl font-bold text-gray-800">Step 6: Customize your approach</h2>
                               <button onClick={() => toggleHelp('preferences')} className="text-sm font-medium text-purple-600 hover:underline">Need Help?</button>
                           </div>
                           {showHelp.preferences && <HelpBox>
@@ -1043,17 +1155,82 @@
                       </div>
                   )}
                   
-                  {currentSection === 6 && (
+                  {currentSection === 7 && (
                       <div className="animate-fade-in">
                           <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"><Zap className="text-yellow-500" />Your automation roadmap is ready!</h2>
-                          <div className="bg-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto mb-6 border border-gray-300">
-                              <pre className="whitespace-pre-wrap">{generateFullReport()}</pre>
+                          
+                          <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+                              <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Visual Report</h3>
+                              <div className="space-y-6">
+                                  {/* Current State Summary */}
+                                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                      <h4 className="font-bold text-yellow-800 mb-2">Current State Analysis</h4>
+                                      <div className="text-sm text-gray-700">
+                                          <p><strong>Workflow Type:</strong> {workflowTemplates[currentWorkflowType]?.name}</p>
+                                          <p><strong>Total Steps:</strong> {userData.workflow.length}</p>
+                                          <p><strong>Current Time Investment:</strong> {userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0)} minutes per instance</p>
+                                          <p><strong>Weekly Time (5x):</strong> {Math.round(userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0) * 5 / 60 * 10) / 10} hours</p>
+                                      </div>
+                                  </div>
+
+                                  {/* Proposed State Summary */}
+                                  {userData.opportunities.filter(opp => opp.selected).length > 0 && (
+                                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                          <h4 className="font-bold text-green-800 mb-2">Proposed Automated State</h4>
+                                          <div className="text-sm text-gray-700">
+                                              <p><strong>Selected Automations:</strong> {userData.opportunities.filter(opp => opp.selected).length}</p>
+                                              <p><strong>Estimated Time After Automation:</strong> {Math.round(userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0) * 0.2)} minutes per instance</p>
+                                              <p><strong>Weekly Time Savings:</strong> {userData.opportunities.filter(opp => opp.selected)[0]?.timeSaved || 'Variable'}</p>
+                                              <p><strong>Implementation Method:</strong> {userData.preferences.method.replace('-', ' ')}</p>
+                                          </div>
+                                      </div>
+                                  )}
+
+                                  {/* Mermaid Diagrams */}
+                                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                      <h4 className="font-bold text-blue-800 mb-2">📈 Workflow Diagrams</h4>
+                                      <div className="space-y-4">
+                                          <div>
+                                              <h5 className="font-semibold text-gray-700 mb-2">Current Manual Process:</h5>
+                                              <div className="bg-white p-3 rounded border text-xs font-mono overflow-x-auto">
+                                                  <pre>{generateMermaidDiagram(userData.workflow, false)}</pre>
+                                              </div>
+                                          </div>
+                                          {userData.opportunities.filter(opp => opp.selected).length > 0 && userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow && (
+                                              <div>
+                                                  <h5 className="font-semibold text-gray-700 mb-2">Proposed Automated Process:</h5>
+                                                  <div className="bg-white p-3 rounded border text-xs font-mono overflow-x-auto">
+                                                      <pre>{generateMermaidDiagram(userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow, true)}</pre>
+                                                  </div>
+                                              </div>
+                                          )}
+                                      </div>
+                                  </div>
+
+                                  {/* Implementation Plan */}
+                                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                      <h4 className="font-bold text-purple-800 mb-2">🚀 Implementation Plan</h4>
+                                      <div className="text-sm text-gray-700 space-y-2">
+                                          {userData.opportunities.filter(opp => opp.selected).map((opp, index) => (
+                                              <div key={opp.id} className="bg-white p-3 rounded border">
+                                                  <h5 className="font-semibold mb-1">{opp.title}</h5>
+                                                  <p className="text-xs text-gray-600 mb-2">{opp.description}</p>
+                                                  <div className="text-xs">
+                                                      <span className={`inline-block px-2 py-1 rounded mr-2 ${opp.difficulty <= 3 ? 'bg-green-100 text-green-800' : opp.difficulty <= 6 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                                                          Difficulty: {opp.difficulty}/10
+                                                      </span>
+                                                      <span className="text-gray-600">{opp.difficultyNote}</span>
+                                                  </div>
+                                              </div>
+                                          ))}
+                                      </div>
+                                  </div>
+                              </div>
                           </div>
+
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <button onClick={copyReport} className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"><Copy size={18} /> Copy Report</button>
-                              <button onClick={downloadReport} className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Download size={18} /> Download (.md)</button>
-                              <button onClick={printReport} className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"><Printer size={18} /> Print Report</button>
-                              <button onClick={() => showNotification('PDF export is a planned feature!', 'info')} className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"><FileText size={18} /> Export as PDF</button>
+                              <button onClick={() => showNotification('PDF export functionality coming soon!', 'info')} className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"><FileText size={18} /> Export as PDF</button>
                           </div>
                       </div>
                   )}
