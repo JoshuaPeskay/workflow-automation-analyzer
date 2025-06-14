@@ -214,7 +214,8 @@
 
           const generateOpportunities = () => {
             const totalTime = userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0);
-            const weeklyTime = Math.round(totalTime / 60 * 5); // Assuming done 5x per week
+            const weeklyTimeMinutes = totalTime * 5; // Assuming done 5x per week, in minutes
+            const weeklyTimeHours = Math.round(weeklyTimeMinutes / 60 * 10) / 10; // Convert to hours, rounded to 1 decimal
             
             // Generate opportunities based on workflow type and user data
             const opportunities = [];
@@ -223,11 +224,16 @@
               opportunities.push({
                 id: 1,
                 title: "AI-Powered Content Creation & Publishing",
-                description: "Automate content research, writing assistance, and multi-platform publishing workflows",
+                description: "Transform your content workflow by letting AI handle research, writing assistance, and automated publishing across platforms.",
+                detailedDescription: "This automation replaces manual research and writing tasks with AI assistance, and eliminates the tedious process of posting content to multiple platforms individually. You'll get faster content creation, consistent quality, and automatic distribution.",
+                whatItDoes: "AI helps generate topic ideas, creates first drafts, suggests improvements, automatically creates matching graphics, and publishes content to all your social media platforms simultaneously.",
+                whyItHelps: "Reduces creative blocks, speeds up writing by 60-70%, eliminates copy-paste publishing tasks, ensures consistent posting schedule, and frees you to focus on strategy rather than execution.",
+                difficulty: 6,
+                difficultyNote: "Moderate setup required - need to configure AI tools, create templates, and connect social media accounts",
                 impact: "High",
                 effort: "Medium",
                 tools: ["ChatGPT/Claude", "Zapier + Buffer", "Canva + API"],
-                timeSaved: `${Math.round(weeklyTime * 0.6)} hours/week`,
+                timeSaved: `${Math.round(weeklyTimeHours * 0.6 * 10) / 10} hours/week`,
                 selected: false,
                 steps: [
                   "Set up AI writing assistants for content ideation and drafts",
@@ -253,11 +259,16 @@
               opportunities.push({
                 id: 2,
                 title: "Automated Data Pipeline & Smart Analytics",
-                description: "Set up automatic data collection, cleaning, and visualization with AI-powered insights",
+                description: "Create a hands-off data analysis system that automatically collects, cleans, analyzes your data and delivers insights.",
+                detailedDescription: "This automation eliminates the manual work of downloading data, cleaning spreadsheets, and creating charts every time you need insights. Your dashboards update themselves, and you get alerts when important trends emerge.",
+                whatItDoes: "Automatically pulls data from all your sources (CRM, Google Analytics, databases), cleans and organizes it, creates updated charts and dashboards, and sends you summary reports with key insights highlighted.",
+                whyItHelps: "Saves 70-80% of manual data work, reduces errors from copy-paste mistakes, provides real-time insights instead of outdated reports, and lets you spot trends immediately rather than weeks later.",
+                difficulty: 7,
+                difficultyNote: "Advanced setup - requires connecting APIs, writing data formulas, and configuring dashboard tools",
                 impact: "High",
                 effort: "Medium",
                 tools: ["Google Sheets + Apps Script", "Tableau + APIs", "Power BI + Power Automate"],
-                timeSaved: `${Math.round(weeklyTime * 0.7)} hours/week`,
+                timeSaved: `${Math.round(weeklyTimeHours * 0.7 * 10) / 10} hours/week`,
                 selected: false,
                 steps: [
                   "Connect data sources via APIs or automated exports",
@@ -283,11 +294,16 @@
               opportunities.push({
                 id: 3,
                 title: "Automated Data Collection & Report Generation",
-                description: "Set up automatic data gathering from your sources and generate reports with one click",
+                description: "Eliminate manual report creation by having your reports generate and send themselves automatically.",
+                detailedDescription: "This automation turns your time-consuming manual reporting process into a set-it-and-forget-it system. Your reports will automatically gather the latest data, format everything consistently, and deliver polished reports to stakeholders on schedule.",
+                whatItDoes: "Automatically collects data from your various sources (project tools, email, spreadsheets), combines it into professional report templates, generates charts and summaries, and emails finished reports to your team or clients.",
+                whyItHelps: "Eliminates 80% of manual report work, ensures reports are always on time and consistent, reduces errors from manual data entry, and gives you back hours each week for higher-value work.",
+                difficulty: 5,
+                difficultyNote: "Moderate setup - need to connect data sources and create report templates, but uses familiar tools",
                 impact: "High",
                 effort: "Medium",
                 tools: ["Google Sheets + Apps Script", "Zapier + Google Drive", "Microsoft Power Automate"],
-                timeSaved: `${Math.round(weeklyTime * 0.7)} hours/week`,
+                timeSaved: `${Math.round(weeklyTimeHours * 0.8 * 10) / 10} hours/week`,
                 selected: false,
                 steps: [
                   "Connect your data sources (email, CRM, etc.) to Google Sheets using Zapier",
@@ -313,11 +329,16 @@
               opportunities.push({
                 id: 4,
                 title: "Smart Data Entry with AI Form Processing",
-                description: "Automatically extract and organize information from emails, documents, and forms",
+                description: "Replace tedious copy-paste data entry with intelligent automation that reads and organizes information for you.",
+                detailedDescription: "This automation uses AI to read emails, PDFs, and forms, automatically extracts the important information, and puts it directly into your spreadsheets or databases. No more manual typing or copy-pasting.",
+                whatItDoes: "Scans incoming emails and documents, identifies key information (names, numbers, dates, etc.), automatically enters data into the correct fields in your database, and flags anything that needs human review.",
+                whyItHelps: "Eliminates 90% of manual data entry work, reduces data entry errors by removing human mistakes, processes information instantly instead of letting it pile up, and frees you from the most tedious part of your job.",
+                difficulty: 3,
+                difficultyNote: "Easy setup - mostly just connecting email to parsing tools and setting up templates",
                 impact: "High",
                 effort: "Low",
                 tools: ["Zapier + Gmail", "Parseur", "Airtable"],
-                timeSaved: `${Math.round(weeklyTime * 0.8)} hours/week`,
+                timeSaved: `${Math.round(weeklyTimeHours * 0.9 * 10) / 10} hours/week`,
                 selected: false,
                 steps: [
                   "Set up email parsing with Parseur to extract data automatically",
@@ -343,11 +364,16 @@
               opportunities.push({
                 id: 5,
                 title: "Automated Follow-up and Meeting Coordination",
-                description: "Set up smart follow-up sequences and automated meeting scheduling",
+                description: "Let automation handle the back-and-forth of scheduling and following up, so relationships stay strong without constant effort.",
+                detailedDescription: "This automation eliminates the time-consuming email ping-pong of scheduling meetings and ensures you never forget to follow up with important contacts. Everything happens automatically based on triggers you set.",
+                whatItDoes: "Automatically sends follow-up emails at the right intervals, lets people book meetings directly into your calendar without email exchanges, sends meeting reminders and confirmations, and triggers follow-ups after meetings or events.",
+                whyItHelps: "Eliminates scheduling back-and-forth emails, ensures consistent follow-up without forgetting anyone, maintains professional relationships automatically, and gives you back hours per week from coordination tasks.",
+                difficulty: 2,
+                difficultyNote: "Very easy setup - mostly just configuring email templates and calendar settings",
                 impact: "High",
                 effort: "Low",
                 tools: ["Calendly", "Zapier + Gmail", "Boomerang"],
-                timeSaved: `${Math.round(weeklyTime * 0.6)} hours/week`,
+                timeSaved: `${Math.round(weeklyTimeHours * 0.7 * 10) / 10} hours/week`,
                 selected: false,
                 steps: [
                   "Set up Calendly for automatic meeting scheduling",
@@ -373,11 +399,16 @@
               opportunities.push({
                 id: 6,
                 title: "AI-Powered Research and Information Organization",
-                description: "Use AI tools to gather, summarize, and organize research automatically",
+                description: "Replace hours of manual research and note-taking with AI that finds, summarizes, and organizes information instantly.",
+                detailedDescription: "This automation uses AI to conduct initial research, create summaries of findings, automatically organize information into logical categories, and maintain a searchable knowledge base that grows over time.",
+                whatItDoes: "AI searches multiple sources for relevant information, creates concise summaries of findings, automatically categorizes and tags research by topic, builds a searchable database of insights, and generates research reports with key findings highlighted.",
+                whyItHelps: "Cuts research time in half by eliminating manual searching and note-taking, ensures you never lose important findings, provides instant access to past research, and helps identify patterns across different research projects.",
+                difficulty: 4,
+                difficultyNote: "Moderate setup - need to configure AI tools and create organization templates, but saves significant time once running",
                 impact: "Medium",
                 effort: "Medium",
                 tools: ["Notion AI", "Zapier + Google Sheets", "Perplexity AI"],
-                timeSaved: `${Math.round(weeklyTime * 0.5)} hours/week`,
+                timeSaved: `${Math.round(weeklyTimeHours * 0.6 * 10) / 10} hours/week`,
                 selected: false,
                 steps: [
                   "Set up research templates in Notion with AI summaries",
@@ -403,11 +434,16 @@
             opportunities.push({
               id: 7,
               title: "Workflow Monitoring and Continuous Improvement",
-              description: "Set up tracking to identify bottlenecks and further optimization opportunities",
+              description: "Set up automatic tracking to identify where you're still losing time and find new automation opportunities.",
+              detailedDescription: "This system automatically tracks how long your workflows take, identifies bottlenecks, and suggests new areas for automation. It's like having a efficiency consultant that works 24/7 to find time savings.",
+              whatItDoes: "Automatically logs workflow completion times, identifies steps that take longer than expected, highlights patterns in your work, and suggests specific areas for further automation based on actual data.",
+              whyItHelps: "Reveals hidden time wasters you might not notice, provides data to justify further automation investments, helps you continuously improve your workflows, and ensures you're always finding new ways to save time.",
+              difficulty: 3,
+              difficultyNote: "Easy setup using simple tracking forms and spreadsheets - no technical skills required",
               impact: "Medium",
               effort: "Low",
               tools: ["Google Forms", "Zapier", "Google Sheets"],
-              timeSaved: "Additional 2-3 hours/week over time",
+              timeSaved: "Additional 1-2 hours/week over time",
               selected: false,
               steps: [
                 "Create simple tracking form for workflow completion times",
@@ -848,18 +884,51 @@
                                         <h3 className="font-bold text-lg flex items-center gap-2">{opp.selected ? <CheckCircle className="text-purple-600" size={20} /> : <div className="w-5 h-5 border-2 border-gray-400 rounded-full flex-shrink-0"></div>}<span className="flex-grow">{opp.title}</span></h3>
                                         <div className="flex items-center gap-2 text-sm font-medium text-yellow-600 flex-shrink-0"><Zap size={16} /> {opp.timeSaved}</div>
                                     </div>
-                                    <p className="text-gray-600 mb-3">{opp.description}</p>
-                                    <div className="flex gap-4 text-sm">
+                                    <p className="text-gray-700 mb-3 font-medium">{opp.description}</p>
+                                    
+                                    {opp.detailedDescription && (
+                                        <div className="bg-white bg-opacity-50 p-4 rounded-lg mb-4 border border-gray-200">
+                                            <p className="text-sm text-gray-600 mb-3">{opp.detailedDescription}</p>
+                                            
+                                            {opp.whatItDoes && (
+                                                <div className="mb-3">
+                                                    <h4 className="font-semibold text-blue-800 text-sm mb-1">What it does:</h4>
+                                                    <p className="text-xs text-gray-600">{opp.whatItDoes}</p>
+                                                </div>
+                                            )}
+                                            
+                                            {opp.whyItHelps && (
+                                                <div className="mb-3">
+                                                    <h4 className="font-semibold text-green-800 text-sm mb-1">Why it helps:</h4>
+                                                    <p className="text-xs text-gray-600">{opp.whyItHelps}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="flex gap-4 text-sm mb-3">
                                         <span className={`px-2 py-1 rounded ${opp.impact === 'High' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                             {opp.impact} Impact
                                         </span>
                                         <span className={`px-2 py-1 rounded ${opp.effort === 'Low' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                             {opp.effort} Effort
                                         </span>
+                                        {opp.difficulty && (
+                                            <span className={`px-2 py-1 rounded ${opp.difficulty <= 3 ? 'bg-green-100 text-green-800' : opp.difficulty <= 6 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
+                                                Difficulty: {opp.difficulty}/10
+                                            </span>
+                                        )}
                                     </div>
+                                    
+                                    {opp.difficultyNote && (
+                                        <div className="text-xs text-gray-500 italic mb-3">
+                                            {opp.difficultyNote}
+                                        </div>
+                                    )}
+                                    
                                     {opp.tools && (
-                                        <div className="mt-3 text-sm text-gray-600">
-                                            <strong>Tools:</strong> {opp.tools.join(', ')}
+                                        <div className="text-sm text-gray-600">
+                                            <strong>Recommended tools:</strong> {opp.tools.join(', ')}
                                         </div>
                                     )}
                                 </div>
