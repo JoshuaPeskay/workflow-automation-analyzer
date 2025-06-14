@@ -97,29 +97,29 @@
               description: 'Creating blog posts, social media content, marketing materials, or documentation',
               example: [
                 { description: 'Research topics and gather information', timeMinutes: 45, tools: 'Web browser, Google Docs' },
-                { description: 'Write and format content', timeMinutes: 60, tools: 'Word, Google Docs' },
-                { description: 'Create or source images and graphics', timeMinutes: 30, tools: 'Canva, Stock photos' },
-                { description: 'Review, edit, and publish content', timeMinutes: 20, tools: 'CMS, Social media platforms' }
+                { description: 'Write and format content', timeMinutes: 90, tools: 'Word, Google Docs' },
+                { description: 'Create or source images and graphics', timeMinutes: 22, tools: 'Canva, Stock photos' },
+                { description: 'Review, edit, and publish content', timeMinutes: 22, tools: 'CMS, Social media platforms' }
               ]
             },
             'data-analysis': {
               name: 'Data Analysis & Insights',
               description: 'Analyzing data, creating visualizations, and extracting business insights',
               example: [
-                { description: 'Export and collect data from various sources', timeMinutes: 25, tools: 'Database, APIs, Excel' },
-                { description: 'Clean and prepare data for analysis', timeMinutes: 40, tools: 'Excel, Google Sheets' },
-                { description: 'Perform analysis and create visualizations', timeMinutes: 50, tools: 'Excel, Tableau, Power BI' },
-                { description: 'Summarize insights and share findings', timeMinutes: 25, tools: 'PowerPoint, Email' }
+                { description: 'Export and collect data from various sources', timeMinutes: 22, tools: 'Database, APIs, Excel' },
+                { description: 'Clean and prepare data for analysis', timeMinutes: 45, tools: 'Excel, Google Sheets' },
+                { description: 'Perform analysis and create visualizations', timeMinutes: 45, tools: 'Excel, Tableau, Power BI' },
+                { description: 'Summarize insights and share findings', timeMinutes: 22, tools: 'PowerPoint, Email' }
               ]
             },
             'reporting': {
               name: 'Status Reports & Updates',
               description: 'Creating regular status updates, progress reports, or summary documents',
               example: [
-                { description: 'Gather updates from team members or systems', timeMinutes: 30, tools: 'Email, Slack, Project tools' },
-                { description: 'Compile information into report format', timeMinutes: 25, tools: 'Word, Google Docs' },
-                { description: 'Add charts, metrics, or visual elements', timeMinutes: 20, tools: 'Excel, PowerPoint' },
-                { description: 'Review, finalize, and distribute report', timeMinutes: 15, tools: 'Email, Slack' }
+                { description: 'Gather updates from team members or systems', timeMinutes: 22, tools: 'Email, Slack, Project tools' },
+                { description: 'Compile information into report format', timeMinutes: 22, tools: 'Word, Google Docs' },
+                { description: 'Add charts, metrics, or visual elements', timeMinutes: 22, tools: 'Excel, PowerPoint' },
+                { description: 'Review, finalize, and distribute report', timeMinutes: 10, tools: 'Email, Slack' }
               ]
             },
             'data-entry': {
@@ -127,8 +127,8 @@
               description: 'Moving information between systems, updating databases, or organizing files',
               example: [
                 { description: 'Receive information (emails, forms, documents)', timeMinutes: 10, tools: 'Email' },
-                { description: 'Copy information to spreadsheet or database', timeMinutes: 40, tools: 'Excel, Database' },
-                { description: 'Check for duplicates or errors', timeMinutes: 15, tools: 'Excel' },
+                { description: 'Copy information to spreadsheet or database', timeMinutes: 45, tools: 'Excel, Database' },
+                { description: 'Check for duplicates or errors', timeMinutes: 10, tools: 'Excel' },
                 { description: 'Save and organize files', timeMinutes: 10, tools: 'File system' }
               ]
             },
@@ -136,8 +136,8 @@
               name: 'Communication & Follow-ups',
               description: 'Sending updates, following up with people, or coordinating meetings',
               example: [
-                { description: 'Check for items needing follow-up', timeMinutes: 15, tools: 'Email, Calendar' },
-                { description: 'Write personalized follow-up messages', timeMinutes: 30, tools: 'Email' },
+                { description: 'Check for items needing follow-up', timeMinutes: 10, tools: 'Email, Calendar' },
+                { description: 'Write personalized follow-up messages', timeMinutes: 22, tools: 'Email' },
                 { description: 'Schedule meetings or calls', timeMinutes: 10, tools: 'Calendar' },
                 { description: 'Send reminders and confirmations', timeMinutes: 10, tools: 'Email' }
               ]
@@ -147,8 +147,8 @@
               description: 'Finding information online, comparing options, or creating summaries',
               example: [
                 { description: 'Search for relevant information online', timeMinutes: 45, tools: 'Web browser' },
-                { description: 'Save and organize findings', timeMinutes: 20, tools: 'Word, Browser bookmarks' },
-                { description: 'Compare options or create summaries', timeMinutes: 30, tools: 'Excel, Word' },
+                { description: 'Save and organize findings', timeMinutes: 22, tools: 'Word, Browser bookmarks' },
+                { description: 'Compare options or create summaries', timeMinutes: 22, tools: 'Excel, Word' },
                 { description: 'Share findings with team', timeMinutes: 10, tools: 'Email' }
               ]
             }
@@ -802,9 +802,19 @@
                                         {userData.workflow.length > 1 && (<button onClick={() => removeWorkflowStep(index)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>)}
                                     </div>
                                     <input type="text" value={step.description} onChange={(e) => updateWorkflowStep(index, 'description', e.target.value)} placeholder="Step description (e.g., Copy data from Email)" className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <input type="number" value={step.timeMinutes} onChange={(e) => updateWorkflowStep(index, 'timeMinutes', e.target.value)} placeholder="Time (minutes)" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
-                                        <input type="text" value={step.tools} onChange={(e) => updateWorkflowStep(index, 'tools', e.target.value)} placeholder="Tools used (e.g., Gmail)" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 mb-1">How long does this step usually take?</label>
+                                            <select value={step.timeMinutes} onChange={(e) => updateWorkflowStep(index, 'timeMinutes', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                                                <option value="">Select time range...</option>
+                                                <option value="10">Under 15 minutes</option>
+                                                <option value="22">15-30 minutes</option>
+                                                <option value="45">30-60 minutes</option>
+                                                <option value="90">60-120 minutes (1-2 hours)</option>
+                                                <option value="150">More than 2 hours</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" value={step.tools} onChange={(e) => updateWorkflowStep(index, 'tools', e.target.value)} placeholder="Tools used (e.g., Gmail, Excel, Slack)" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none"/>
                                     </div>
                                 </div>
                             ))}
