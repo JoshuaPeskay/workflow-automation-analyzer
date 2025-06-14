@@ -92,14 +92,34 @@
           const updatePreferences = (field, value) => { setUserData(prev => ({...prev, preferences: { ...prev.preferences, [field]: value }})); };
 
           const workflowTemplates = {
-            'reporting': {
-              name: 'Creating Reports',
-              description: 'Tasks like weekly status reports, data summaries, or performance dashboards',
+            'content-creation': {
+              name: 'Content Creation & Publishing',
+              description: 'Creating blog posts, social media content, marketing materials, or documentation',
               example: [
-                { description: 'Collect data from different sources (emails, spreadsheets, systems)', timeMinutes: 30, tools: 'Email, Excel, CRM' },
-                { description: 'Clean and organize the data', timeMinutes: 20, tools: 'Excel' },
-                { description: 'Create charts or summaries', timeMinutes: 25, tools: 'Excel, PowerPoint' },
-                { description: 'Write up findings and send report', timeMinutes: 15, tools: 'Email, Word' }
+                { description: 'Research topics and gather information', timeMinutes: 45, tools: 'Web browser, Google Docs' },
+                { description: 'Write and format content', timeMinutes: 60, tools: 'Word, Google Docs' },
+                { description: 'Create or source images and graphics', timeMinutes: 30, tools: 'Canva, Stock photos' },
+                { description: 'Review, edit, and publish content', timeMinutes: 20, tools: 'CMS, Social media platforms' }
+              ]
+            },
+            'data-analysis': {
+              name: 'Data Analysis & Insights',
+              description: 'Analyzing data, creating visualizations, and extracting business insights',
+              example: [
+                { description: 'Export and collect data from various sources', timeMinutes: 25, tools: 'Database, APIs, Excel' },
+                { description: 'Clean and prepare data for analysis', timeMinutes: 40, tools: 'Excel, Google Sheets' },
+                { description: 'Perform analysis and create visualizations', timeMinutes: 50, tools: 'Excel, Tableau, Power BI' },
+                { description: 'Summarize insights and share findings', timeMinutes: 25, tools: 'PowerPoint, Email' }
+              ]
+            },
+            'reporting': {
+              name: 'Status Reports & Updates',
+              description: 'Creating regular status updates, progress reports, or summary documents',
+              example: [
+                { description: 'Gather updates from team members or systems', timeMinutes: 30, tools: 'Email, Slack, Project tools' },
+                { description: 'Compile information into report format', timeMinutes: 25, tools: 'Word, Google Docs' },
+                { description: 'Add charts, metrics, or visual elements', timeMinutes: 20, tools: 'Excel, PowerPoint' },
+                { description: 'Review, finalize, and distribute report', timeMinutes: 15, tools: 'Email, Slack' }
               ]
             },
             'data-entry': {
@@ -199,9 +219,69 @@
             // Generate opportunities based on workflow type and user data
             const opportunities = [];
             
-            if (currentWorkflowType === 'reporting') {
+            if (currentWorkflowType === 'content-creation') {
               opportunities.push({
                 id: 1,
+                title: "AI-Powered Content Creation & Publishing",
+                description: "Automate content research, writing assistance, and multi-platform publishing workflows",
+                impact: "High",
+                effort: "Medium",
+                tools: ["ChatGPT/Claude", "Zapier + Buffer", "Canva + API"],
+                timeSaved: `${Math.round(weeklyTime * 0.6)} hours/week`,
+                selected: false,
+                steps: [
+                  "Set up AI writing assistants for content ideation and drafts",
+                  "Create content templates and brand guidelines for consistency",
+                  "Use Canva API or templates for automated graphic creation",
+                  "Set up publishing automation to multiple platforms via Buffer/Hootsuite"
+                ],
+                automatedWorkflow: userData.workflow.map(step => ({
+                  ...step,
+                  automatedTools: step.description.includes('Research') ? 'ChatGPT + Perplexity AI' :
+                                 step.description.includes('Write') ? 'ChatGPT + Grammarly' :
+                                 step.description.includes('images') ? 'Canva templates + AI images' :
+                                 'Buffer + Zapier (auto-publish)',
+                  automationNote: step.description.includes('Research') ? 'AI provides topic ideas and research' :
+                                 step.description.includes('Write') ? 'AI assists with writing and editing' :
+                                 step.description.includes('images') ? 'Templates and AI-generated visuals' :
+                                 'Content published automatically across platforms'
+                }))
+              });
+            }
+            
+            if (currentWorkflowType === 'data-analysis') {
+              opportunities.push({
+                id: 2,
+                title: "Automated Data Pipeline & Smart Analytics",
+                description: "Set up automatic data collection, cleaning, and visualization with AI-powered insights",
+                impact: "High",
+                effort: "Medium",
+                tools: ["Google Sheets + Apps Script", "Tableau + APIs", "Power BI + Power Automate"],
+                timeSaved: `${Math.round(weeklyTime * 0.7)} hours/week`,
+                selected: false,
+                steps: [
+                  "Connect data sources via APIs or automated exports",
+                  "Set up automated data cleaning and validation rules",
+                  "Create dynamic dashboards with auto-refreshing visualizations",
+                  "Configure automated insight alerts and report distribution"
+                ],
+                automatedWorkflow: userData.workflow.map(step => ({
+                  ...step,
+                  automatedTools: step.description.includes('Export') ? 'API connectors + Zapier' :
+                                 step.description.includes('Clean') ? 'Google Sheets (auto-formulas)' :
+                                 step.description.includes('analysis') ? 'Tableau + Power BI (auto-refresh)' :
+                                 'Email + Slack (auto-distribute)',
+                  automationNote: step.description.includes('Export') ? 'Data flows automatically from sources' :
+                                 step.description.includes('Clean') ? 'Formulas and scripts clean data automatically' :
+                                 step.description.includes('analysis') ? 'Dashboards update and analyze automatically' :
+                                 'Insights distributed automatically to stakeholders'
+                }))
+              });
+            }
+            
+            if (currentWorkflowType === 'reporting') {
+              opportunities.push({
+                id: 3,
                 title: "Automated Data Collection & Report Generation",
                 description: "Set up automatic data gathering from your sources and generate reports with one click",
                 impact: "High",
@@ -231,7 +311,7 @@
             
             if (currentWorkflowType === 'data-entry') {
               opportunities.push({
-                id: 2,
+                id: 4,
                 title: "Smart Data Entry with AI Form Processing",
                 description: "Automatically extract and organize information from emails, documents, and forms",
                 impact: "High",
@@ -261,7 +341,7 @@
             
             if (currentWorkflowType === 'communication') {
               opportunities.push({
-                id: 3,
+                id: 5,
                 title: "Automated Follow-up and Meeting Coordination",
                 description: "Set up smart follow-up sequences and automated meeting scheduling",
                 impact: "High",
@@ -291,7 +371,7 @@
             
             if (currentWorkflowType === 'research') {
               opportunities.push({
-                id: 4,
+                id: 6,
                 title: "AI-Powered Research and Information Organization",
                 description: "Use AI tools to gather, summarize, and organize research automatically",
                 impact: "Medium",
@@ -321,7 +401,7 @@
             
             // Add a universal efficiency opportunity
             opportunities.push({
-              id: 5,
+              id: 7,
               title: "Workflow Monitoring and Continuous Improvement",
               description: "Set up tracking to identify bottlenecks and further optimization opportunities",
               impact: "Medium",
@@ -654,12 +734,19 @@
                         </div>
                         {showHelp.workflowType && <HelpBox>
                             <div className="text-sm text-gray-700 space-y-2">
-                                <p>Choose the category that best matches the repetitive work you want to automate. Don't worry about getting it perfect - we'll customize everything in the next step.</p>
+                                <p>Choose the category that <strong>most closely resembles</strong> your workflow. Your specific task might be different, but picking the closest match gives you a great starting point with pre-filled examples that you can customize.</p>
+                                <p><strong>Example:</strong> If you create marketing emails, choose "Content Creation" even though your specific steps will be different from blog writing.</p>
                                 <p><strong>Tip:</strong> Think about the work that takes you the most time or that you find most tedious. That's usually the best place to start with automation!</p>
                             </div>
                         </HelpBox>}
-                        <p className="text-gray-600 mb-6">Select the type of workflow that best matches your repetitive task:</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6">
+                            <p className="text-sm text-blue-800">
+                                <strong>Don't see an exact match?</strong> That's perfectly normal! Pick the workflow type that's <em>closest</em> to your work. 
+                                We'll give you a helpful starting template that you can customize to match your specific process in the next step.
+                            </p>
+                        </div>
+                        <p className="text-gray-600 mb-6">Select the workflow type that most closely matches your repetitive task:</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {Object.entries(workflowTemplates).map(([key, template]) => (
                                 <div key={key} onClick={() => selectWorkflowType(key)} className={`cursor-pointer p-6 rounded-xl border-2 transition-all transform hover:scale-[1.02] ${currentWorkflowType === key ? 'border-purple-600 bg-purple-50 shadow-lg' : 'border-gray-300 bg-white hover:border-purple-400'}`}>
                                     <div className="flex items-start gap-3">
