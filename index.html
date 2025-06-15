@@ -830,8 +830,8 @@
               // Date and user info
               doc.setFontSize(10);
               doc.setFont(undefined, 'normal');
-              doc.text(\`Generated: \${new Date().toLocaleDateString()}\`, margin, 30);
-              doc.text(\`Report for: \${userData.profile.role}\`, pageWidth - margin - 80, 30);
+              doc.text(`Generated: ${new Date().toLocaleDateString()}`, margin, 30);
+              doc.text(`Report for: ${userData.profile.role}`, pageWidth - margin - 80, 30);
               
               yPosition = 50;
               doc.setTextColor(0, 0, 0);
@@ -852,13 +852,13 @@
               const timeSaved = totalCurrentTime - automatedTime;
               
               yPosition += 15;
-              doc.text(\`Current workflow time: \${totalCurrentTime} minutes per instance\`, margin, yPosition);
+              doc.text(`Current workflow time: ${totalCurrentTime} minutes per instance`, margin, yPosition);
               yPosition += 6;
-              doc.text(\`Automated workflow time: \${automatedTime} minutes per instance\`, margin, yPosition);
+              doc.text(`Automated workflow time: ${automatedTime} minutes per instance`, margin, yPosition);
               yPosition += 6;
               doc.setFont(undefined, 'bold');
               doc.setTextColor(34, 197, 94); // Green
-              doc.text(\`Time savings: \${timeSaved} minutes (\${Math.round((timeSaved / totalCurrentTime) * 100)}% reduction)\`, margin, yPosition);
+              doc.text(`Time savings: ${timeSaved} minutes (${Math.round((timeSaved / totalCurrentTime) * 100)}% reduction)`, margin, yPosition);
               doc.setFont(undefined, 'normal');
               doc.setTextColor(0, 0, 0);
               
@@ -883,10 +883,10 @@
                 // Step box
                 addColoredBox(margin - 2, yPosition - 3, maxWidth + 4, 12, {r: 249, g: 250, b: 251}); // Gray background
                 doc.setFont(undefined, 'bold');
-                doc.text(\`Step \${index + 1}: \${step.description}\`, margin, yPosition + 3);
+                doc.text(`Step ${index + 1}: ${step.description}`, margin, yPosition + 3);
                 yPosition += 8;
                 doc.setFont(undefined, 'normal');
-                doc.text(\`⏱ Time: \${step.timeMinutes || 0} minutes  |  🔧 Tools: \${step.tools || 'N/A'}\`, margin + 5, yPosition);
+                doc.text(`⏱ Time: ${step.timeMinutes || 0} minutes  |  🔧 Tools: ${step.tools || 'N/A'}`, margin + 5, yPosition);
                 yPosition += 10;
               });
               
@@ -912,7 +912,7 @@
                   doc.setFontSize(12);
                   doc.setFont(undefined, 'bold');
                   doc.setTextColor(255, 255, 255);
-                  doc.text(\`\${index + 1}. \${opp.title}\`, margin, yPosition);
+                  doc.text(`${index + 1}. ${opp.title}`, margin, yPosition);
                   
                   yPosition += 15;
                   doc.setTextColor(0, 0, 0);
@@ -925,16 +925,16 @@
                   doc.rect(margin, badgeY - 3, 25, 8, 'F');
                   doc.setTextColor(255, 255, 255);
                   doc.setFontSize(8);
-                  doc.text(\`\${opp.impact} Impact\`, margin + 2, badgeY + 1);
+                  doc.text(`${opp.impact} Impact`, margin + 2, badgeY + 1);
                   
                   doc.setFillColor(59, 130, 246); // Blue
                   doc.rect(margin + 30, badgeY - 3, 25, 8, 'F');
-                  doc.text(\`\${opp.effort} Effort\`, margin + 32, badgeY + 1);
+                  doc.text(`${opp.effort} Effort`, margin + 32, badgeY + 1);
                   
                   if (opp.timeSaved) {
                     doc.setFillColor(245, 158, 11); // Amber
                     doc.rect(margin + 60, badgeY - 3, 35, 8, 'F');
-                    doc.text(\`\${opp.timeSaved}\`, margin + 62, badgeY + 1);
+                    doc.text(`${opp.timeSaved}`, margin + 62, badgeY + 1);
                   }
                   
                   yPosition += 15;
@@ -959,7 +959,7 @@
                     doc.setFont(undefined, 'normal');
                     opp.tools.forEach(tool => {
                       checkNewPage();
-                      doc.text(\`• \${tool}\`, margin + 5, yPosition);
+                      doc.text(`• ${tool}`, margin + 5, yPosition);
                       yPosition += 5;
                     });
                     yPosition += 5;
@@ -973,7 +973,7 @@
                     doc.setFont(undefined, 'normal');
                     opp.steps.forEach((step, stepIndex) => {
                       checkNewPage();
-                      const stepLines = doc.splitTextToSize(\`\${stepIndex + 1}. \${step}\`, maxWidth - 10);
+                      const stepLines = doc.splitTextToSize(`${stepIndex + 1}. ${step}`, maxWidth - 10);
                       stepLines.forEach(line => {
                         doc.text(line, margin + 5, yPosition);
                         yPosition += 5;
@@ -1011,7 +1011,7 @@
                 doc.setFont(undefined, 'normal');
                 phase.items.forEach(item => {
                   checkNewPage();
-                  doc.text(\`• \${item}\`, margin + 5, yPosition);
+                  doc.text(`• ${item}`, margin + 5, yPosition);
                   yPosition += 5;
                 });
                 yPosition += 8;
@@ -1022,9 +1022,9 @@
               doc.setFontSize(8);
               doc.setTextColor(128, 128, 128);
               doc.text('Generated by Workflow Automation Analyzer - claude.ai/code', margin, finalY);
-              doc.text(\`Page \${doc.internal.getNumberOfPages()}\`, pageWidth - margin - 20, finalY);
+              doc.text(`Page ${doc.internal.getNumberOfPages()}`, pageWidth - margin - 20, finalY);
               
-              const fileName = \`workflow-automation-report-\${new Date().toISOString().split('T')[0]}.pdf\`;
+              const fileName = `workflow-automation-report-${new Date().toISOString().split('T')[0]}.pdf`;
               doc.save(fileName);
               showNotification('PDF downloaded successfully!', 'success');
             } catch (error) {
