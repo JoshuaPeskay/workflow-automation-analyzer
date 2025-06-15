@@ -798,89 +798,233 @@
               const { jsPDF } = window.jspdf;
               const doc = new jsPDF();
               
-              const report = generateFullReport();
-              const lines = report.split('\n');
+              let yPosition = 25;
+              const pageWidth = 210;
+              const pageHeight = 297;
+              const margin = 20;
+              const maxWidth = pageWidth - (margin * 2);
               
-              let yPosition = 20;
-              const maxWidth = 180;
-              const lineHeight = 6;
-              const pageHeight = 280;
-              
-              doc.setFontSize(16);
-              doc.text('Workflow Automation Report', 20, yPosition);
-              yPosition += 15;
-              
-              doc.setFontSize(10);
-              
-              lines.forEach(line => {
-                if (yPosition > pageHeight - 20) {
+              // Helper function to add a new page if needed
+              const checkNewPage = (neededSpace = 15) => {
+                if (yPosition > pageHeight - margin - neededSpace) {
                   doc.addPage();
-                  yPosition = 20;
+                  yPosition = margin;
+                  return true;
                 }
+                return false;
+              };
+              
+              // Helper function to add colored background boxes
+              const addColoredBox = (x, y, width, height, color) => {
+                doc.setFillColor(color.r, color.g, color.b);
+                doc.rect(x, y, width, height, 'F');
+              };
+              
+              // Header with colored background
+              addColoredBox(0, 0, pageWidth, 35, {r: 139, g: 92, b: 246}); // Purple
+              doc.setTextColor(255, 255, 255);
+              doc.setFontSize(20);
+              doc.setFont(undefined, 'bold');
+              doc.text('🤖 Workflow Automation Report', margin, 22);
+              
+              // Date and user info
+              doc.setFontSize(10);
+              doc.setFont(undefined, 'normal');
+              doc.text(\`Generated: \${new Date().toLocaleDateString()}\`, margin, 30);
+              doc.text(\`Report for: \${userData.profile.role}\`, pageWidth - margin - 80, 30);
+              
+              yPosition = 50;
+              doc.setTextColor(0, 0, 0);
+              
+              // Executive Summary Box
+              checkNewPage(40);
+              addColoredBox(margin - 5, yPosition - 5, maxWidth + 10, 35, {r: 240, g: 245, b: 255}); // Light blue
+              doc.setFontSize(16);
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(37, 99, 235); // Blue
+              doc.text('📊 Executive Summary', margin, yPosition + 5);
+              
+              doc.setFontSize(11);
+              doc.setFont(undefined, 'normal');
+              doc.setTextColor(0, 0, 0);
+              const totalCurrentTime = userData.workflow.reduce((sum, step) => sum + (step.timeMinutes || 0), 0);
+              const automatedTime = Math.max(userData.opportunities.filter(opp => opp.selected).length, Math.floor(totalCurrentTime * 0.2));
+              const timeSaved = totalCurrentTime - automatedTime;
+              
+              yPosition += 15;
+              doc.text(\`Current workflow time: \${totalCurrentTime} minutes per instance\`, margin, yPosition);
+              yPosition += 6;
+              doc.text(\`Automated workflow time: \${automatedTime} minutes per instance\`, margin, yPosition);
+              yPosition += 6;
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(34, 197, 94); // Green
+              doc.text(\`Time savings: \${timeSaved} minutes (\${Math.round((timeSaved / totalCurrentTime) * 100)}% reduction)\`, margin, yPosition);
+              doc.setFont(undefined, 'normal');
+              doc.setTextColor(0, 0, 0);
+              
+              yPosition += 20;
+              
+              // Current Workflow Analysis
+              checkNewPage(60);
+              addColoredBox(margin - 5, yPosition - 5, maxWidth + 10, 15, {r: 254, g: 240, b: 138}); // Yellow
+              doc.setFontSize(14);
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(161, 98, 7); // Amber
+              doc.text('⚡ Current Workflow Analysis', margin, yPosition + 5);
+              
+              yPosition += 20;
+              doc.setFontSize(10);
+              doc.setFont(undefined, 'normal');
+              doc.setTextColor(0, 0, 0);
+              
+              userData.workflow.forEach((step, index) => {
+                checkNewPage(15);
                 
-                // Handle different line types
-                if (line.startsWith('# ')) {
-                  doc.setFontSize(14);
-                  doc.setFont(undefined, 'bold');
-                  const text = line.substring(2);
-                  const splitText = doc.splitTextToSize(text, maxWidth);
-                  splitText.forEach(textLine => {
-                    doc.text(textLine, 20, yPosition);
-                    yPosition += lineHeight + 2;
-                  });
-                  yPosition += 3;
-                } else if (line.startsWith('## ')) {
-                  doc.setFontSize(12);
-                  doc.setFont(undefined, 'bold');
-                  const text = line.substring(3);
-                  const splitText = doc.splitTextToSize(text, maxWidth);
-                  splitText.forEach(textLine => {
-                    doc.text(textLine, 20, yPosition);
-                    yPosition += lineHeight + 1;
-                  });
-                  yPosition += 2;
-                } else if (line.startsWith('### ')) {
-                  doc.setFontSize(11);
-                  doc.setFont(undefined, 'bold');
-                  const text = line.substring(4);
-                  const splitText = doc.splitTextToSize(text, maxWidth);
-                  splitText.forEach(textLine => {
-                    doc.text(textLine, 20, yPosition);
-                    yPosition += lineHeight;
-                  });
-                  yPosition += 2;
-                } else if (line.startsWith('**') && line.endsWith('**')) {
-                  doc.setFontSize(10);
-                  doc.setFont(undefined, 'bold');
-                  const text = line.substring(2, line.length - 2);
-                  const splitText = doc.splitTextToSize(text, maxWidth);
-                  splitText.forEach(textLine => {
-                    doc.text(textLine, 20, yPosition);
-                    yPosition += lineHeight;
-                  });
-                } else if (line.startsWith('- ')) {
-                  doc.setFontSize(10);
-                  doc.setFont(undefined, 'normal');
-                  const text = '• ' + line.substring(2);
-                  const splitText = doc.splitTextToSize(text, maxWidth - 10);
-                  splitText.forEach(textLine => {
-                    doc.text(textLine, 25, yPosition);
-                    yPosition += lineHeight;
-                  });
-                } else if (line.trim() === '' || line.startsWith('---')) {
-                  yPosition += 3;
-                } else if (line.trim() !== '') {
-                  doc.setFontSize(10);
-                  doc.setFont(undefined, 'normal');
-                  const splitText = doc.splitTextToSize(line, maxWidth);
-                  splitText.forEach(textLine => {
-                    doc.text(textLine, 20, yPosition);
-                    yPosition += lineHeight;
-                  });
-                }
+                // Step box
+                addColoredBox(margin - 2, yPosition - 3, maxWidth + 4, 12, {r: 249, g: 250, b: 251}); // Gray background
+                doc.setFont(undefined, 'bold');
+                doc.text(\`Step \${index + 1}: \${step.description}\`, margin, yPosition + 3);
+                yPosition += 8;
+                doc.setFont(undefined, 'normal');
+                doc.text(\`⏱ Time: \${step.timeMinutes || 0} minutes  |  🔧 Tools: \${step.tools || 'N/A'}\`, margin + 5, yPosition);
+                yPosition += 10;
               });
               
-              const fileName = `workflow-automation-report-${new Date().toISOString().split('T')[0]}.pdf`;
+              // Selected Automations
+              const selectedOpportunities = userData.opportunities.filter(opp => opp.selected);
+              if (selectedOpportunities.length > 0) {
+                yPosition += 10;
+                checkNewPage(40);
+                
+                addColoredBox(margin - 5, yPosition - 5, maxWidth + 10, 15, {r: 220, g: 252, b: 231}); // Light green
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(21, 128, 61); // Green
+                doc.text('🚀 Recommended Automation Solutions', margin, yPosition + 5);
+                
+                yPosition += 25;
+                
+                selectedOpportunities.forEach((opp, index) => {
+                  checkNewPage(50);
+                  
+                  // Automation box
+                  addColoredBox(margin - 5, yPosition - 5, maxWidth + 10, 8, {r: 34, g: 197, b: 94}); // Green header
+                  doc.setFontSize(12);
+                  doc.setFont(undefined, 'bold');
+                  doc.setTextColor(255, 255, 255);
+                  doc.text(\`\${index + 1}. \${opp.title}\`, margin, yPosition);
+                  
+                  yPosition += 15;
+                  doc.setTextColor(0, 0, 0);
+                  doc.setFontSize(10);
+                  doc.setFont(undefined, 'normal');
+                  
+                  // Impact badges
+                  const badgeY = yPosition;
+                  doc.setFillColor(34, 197, 94); // Green
+                  doc.rect(margin, badgeY - 3, 25, 8, 'F');
+                  doc.setTextColor(255, 255, 255);
+                  doc.setFontSize(8);
+                  doc.text(\`\${opp.impact} Impact\`, margin + 2, badgeY + 1);
+                  
+                  doc.setFillColor(59, 130, 246); // Blue
+                  doc.rect(margin + 30, badgeY - 3, 25, 8, 'F');
+                  doc.text(\`\${opp.effort} Effort\`, margin + 32, badgeY + 1);
+                  
+                  if (opp.timeSaved) {
+                    doc.setFillColor(245, 158, 11); // Amber
+                    doc.rect(margin + 60, badgeY - 3, 35, 8, 'F');
+                    doc.text(\`\${opp.timeSaved}\`, margin + 62, badgeY + 1);
+                  }
+                  
+                  yPosition += 15;
+                  doc.setTextColor(0, 0, 0);
+                  doc.setFontSize(10);
+                  
+                  // Description
+                  const descriptionLines = doc.splitTextToSize(opp.description, maxWidth - 10);
+                  descriptionLines.forEach(line => {
+                    checkNewPage();
+                    doc.text(line, margin, yPosition);
+                    yPosition += 5;
+                  });
+                  
+                  yPosition += 5;
+                  
+                  // Tools
+                  if (opp.tools && opp.tools.length > 0) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Recommended Tools:', margin, yPosition);
+                    yPosition += 6;
+                    doc.setFont(undefined, 'normal');
+                    opp.tools.forEach(tool => {
+                      checkNewPage();
+                      doc.text(\`• \${tool}\`, margin + 5, yPosition);
+                      yPosition += 5;
+                    });
+                    yPosition += 5;
+                  }
+                  
+                  // Implementation steps
+                  if (opp.steps && opp.steps.length > 0) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text('Implementation Steps:', margin, yPosition);
+                    yPosition += 6;
+                    doc.setFont(undefined, 'normal');
+                    opp.steps.forEach((step, stepIndex) => {
+                      checkNewPage();
+                      const stepLines = doc.splitTextToSize(\`\${stepIndex + 1}. \${step}\`, maxWidth - 10);
+                      stepLines.forEach(line => {
+                        doc.text(line, margin + 5, yPosition);
+                        yPosition += 5;
+                      });
+                    });
+                  }
+                  
+                  yPosition += 15;
+                });
+              }
+              
+              // Implementation Roadmap
+              checkNewPage(40);
+              addColoredBox(margin - 5, yPosition - 5, maxWidth + 10, 15, {r: 236, g: 254, b: 255}); // Light cyan
+              doc.setFontSize(14);
+              doc.setFont(undefined, 'bold');
+              doc.setTextColor(8, 145, 178); // Cyan
+              doc.text('🗺 Implementation Roadmap', margin, yPosition + 5);
+              
+              yPosition += 25;
+              doc.setFontSize(11);
+              doc.setTextColor(0, 0, 0);
+              
+              const roadmapPhases = [
+                { title: 'Phase 1 (Month 1): Foundation', items: ['Set up accounts for recommended tools', 'Implement one automation (highest impact, lowest effort)', 'Document your new process', 'Measure time savings'] },
+                { title: 'Phase 2 (Month 2): Expansion', items: ['Add remaining automations', 'Integrate systems for seamless workflow', 'Train team members if applicable', 'Set up monitoring and alerts'] },
+                { title: 'Phase 3 (Month 3+): Optimization', items: ['Analyze performance data', 'Identify additional automation opportunities', 'Scale successful automations', 'Continuous improvement'] }
+              ];
+              
+              roadmapPhases.forEach(phase => {
+                checkNewPage(25);
+                doc.setFont(undefined, 'bold');
+                doc.text(phase.title, margin, yPosition);
+                yPosition += 8;
+                doc.setFont(undefined, 'normal');
+                phase.items.forEach(item => {
+                  checkNewPage();
+                  doc.text(\`• \${item}\`, margin + 5, yPosition);
+                  yPosition += 5;
+                });
+                yPosition += 8;
+              });
+              
+              // Footer on last page
+              const finalY = pageHeight - 15;
+              doc.setFontSize(8);
+              doc.setTextColor(128, 128, 128);
+              doc.text('Generated by Workflow Automation Analyzer - claude.ai/code', margin, finalY);
+              doc.text(\`Page \${doc.internal.getNumberOfPages()}\`, pageWidth - margin - 20, finalY);
+              
+              const fileName = \`workflow-automation-report-\${new Date().toISOString().split('T')[0]}.pdf\`;
               doc.save(fileName);
               showNotification('PDF downloaded successfully!', 'success');
             } catch (error) {
@@ -1233,7 +1377,7 @@
                                   </div>
                               </div>
 
-                              {userData.opportunities.filter(opp => opp.selected).length > 0 && userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow && (
+                              {userData.opportunities.length > 0 && (
                                   <div className="bg-white border border-gray-200 rounded-xl p-6">
                                       <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                                           <div className="bg-green-500 text-white rounded-full p-1">
@@ -1241,21 +1385,36 @@
                                           </div>
                                           Proposed Automated Workflow
                                       </h3>
-                                      <MermaidDiagram 
-                                          diagram={generateMermaidDiagram(userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow, true)} 
-                                          id="automated-workflow" 
-                                      />
-                                      <div className="flex gap-2 mt-3">
-                                          <button onClick={() => copyToClipboard(generateMermaidDiagram(userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow, true))} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded">
-                                              Copy Mermaid Code
-                                          </button>
-                                          <details className="text-sm">
-                                              <summary className="cursor-pointer text-gray-600 hover:text-gray-800">View Code</summary>
-                                              <div className="bg-gray-50 p-3 rounded mt-2">
-                                                  <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap">{generateMermaidDiagram(userData.opportunities.filter(opp => opp.selected)[0].automatedWorkflow, true)}</pre>
-                                              </div>
-                                          </details>
-                                      </div>
+                                      {(() => {
+                                          // Get the first selected opportunity, or the first opportunity if none selected yet
+                                          const selectedOpps = userData.opportunities.filter(opp => opp.selected);
+                                          const targetOpp = selectedOpps.length > 0 ? selectedOpps[0] : userData.opportunities[0];
+                                          const automatedWorkflow = targetOpp?.automatedWorkflow || userData.workflow.map(step => ({
+                                              ...step,
+                                              automatedTools: 'Automated tools',
+                                              automationNote: 'Automated process'
+                                          }));
+                                          
+                                          return (
+                                              <>
+                                                  <MermaidDiagram 
+                                                      diagram={generateMermaidDiagram(automatedWorkflow, true)} 
+                                                      id="automated-workflow" 
+                                                  />
+                                                  <div className="flex gap-2 mt-3">
+                                                      <button onClick={() => copyToClipboard(generateMermaidDiagram(automatedWorkflow, true))} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded">
+                                                          Copy Mermaid Code
+                                                      </button>
+                                                      <details className="text-sm">
+                                                          <summary className="cursor-pointer text-gray-600 hover:text-gray-800">View Code</summary>
+                                                          <div className="bg-gray-50 p-3 rounded mt-2">
+                                                              <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap">{generateMermaidDiagram(automatedWorkflow, true)}</pre>
+                                                          </div>
+                                                      </details>
+                                                  </div>
+                                              </>
+                                          );
+                                      })()}
                                   </div>
                               )}
                           </div>
